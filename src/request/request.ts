@@ -30,7 +30,7 @@ axios.interceptors.response.use(
         !window.location.pathname.includes('/user/login')
       ) {
         message.warning('请先登录')
-        window.location.href = '/user/login?redirect=${window.location.href}'
+        window.location.href = `/user/login?redirect=${window.location.href}`
       }
     }
     // 2xx 范围内的状态码都会触发该函数。

@@ -1,0 +1,146 @@
+全局权限管理
+在本节“用户权限控制”部分，我们使用了一种较为简单的方式实现，但是后续补充页面和权限校验逻辑时，
+我们要同时修改权限管理文件和导航栏文件，相当于维护了2个文件，比较麻烦，有没有更好的办法呢？
+
+需求：能够通过维护一个配置文件，灵活配置每个页面所需要的用户权限，由全局权限管理系统自动校验和拦截，而不
+需要在每个页面中编写权限校验代码，提高开发效率。此外，还能根据该配置文件自动隐藏没权限的菜单项的展示。
+
+实现方案：
+ 1.在路由配置文件，利用VueRouter 的 meta附加参数，定义某个路由的访问权限
+ 2.使用全局路由监听器，每次访问页面时，根据用户要访问页面的路由权限信息，判断用户是否有对应的访问权限，并进行相应的拦截处理。
+需要先自行新建 NoAuth.vue 无权限页面，内容随便写，比如显示“你没有权限"
+
+新建 access 目录，所有权限管理相关的代码都放在该目录下，模块化。只要不引入，就不会生效。
+1）定义权限枚举文件 accessEnum.ts:
+/**
+ * 权限定义
+ */
+const ACCESS_ENUM = {
+  NOT_LOGIN: "notLogin",
+  USER: "user",
+  ADMIN: "admin",
+};
+
+export default ACCESS_ENUM;
+
+2）修改路由配置文件，在meta中补充需要的权限：
+{
+  path: '/admin/userManage',
+  name: 'adminUserManage',
+  component: UserManagePage,
+  meta: {
+    access: ACCESS_ENUM.ADMIN,
+  },
+},
+
+3）编写通用的权限校验方法。
+Q：为什么？
+A：因为菜单组件中要判断权限来过滤展示的菜单项、权限拦截也要用到权限判断功能，所以抽离成公共模块。
+
+checkAccess.ts 文件：
+import ACCESS_ENUM from "@/access/accessEnum";
+
+/**
+ * 检查权限（判断当前登录用户是否具有某个权限）
+ * @param loginUser 当前登录用户
+ * @param needAccess 需要有的权限
+ * @return boolean 有无权限
+ */
+const checkAccess = (loginUser: any, needAccess = ACCESS_ENUM.NOT_LOGIN) => {
+  // 获取当前登录用户具有的权限（如果没有 loginUser，则表示未登录）
+  const loginUserAccess = loginUser?.userRole ?? ACCESS_ENUM.NOT_LOGIN;
+  if (needAccess === ACCESS_ENUM.NOT_LOGIN) {
+    return true;
+  }
+  // 如果用户登录才能访问
+  if (needAccess === ACCESS_ENUM.USER) {
+    // 如果用户没登录，那么表示无权限
+    if (loginUserAccess === ACCESS_ENUM.NOT_LOGIN) {
+      return false;
+    }
+  }
+  // 如果需要管理员权限
+  if (needAccess === ACCESS_ENUM.ADMIN) {
+    // 如果不为管理员，表示无权限
+    if (loginUserAccess !== ACCESS_ENUM.ADMIN) {
+      return false;
+    }
+  }
+  return true;
+};
+
+export default checkAccess;
+
+
+4）编写全局权限校验核心文件 access/index.ts o
+逻辑如下:
+ 1.首先判断页面是否需要登录权限，如果不需要，直接放行。
+ 2.如果页面需要登录权限
+  i.如果用户未登录，则跳转到登录页面。
+  ii.如果已登录，判断登录用户的权限是否符合要求，否则跳转到401无权限页面。
+实现代码如下：
+
+import router from '@/router'
+import { useLoginUserStore } from '@/stores/useLoginUserStore'
+import ACCESS_ENUM from './accessEnum'
+import checkAccess from './checkAccess'
+
+router.beforeEach(async (to, from, next) => {
+  const loginUserStore = useLoginUserStore()
+  let loginUser = loginUserStore.loginUser
+  console.log('登陆用户信息', loginUser)
+  const needAccess = (to.meta?.access as string) ?? ACCESS_ENUM.NOT_LOGIN
+  // 要跳转的页面必须要登陆
+  if (needAccess !== ACCESS_ENUM.NOT_LOGIN) {
+    // 如果没登陆，跳转到登录页面
+    if (!loginUser || !loginUser.userRole || loginUser.userRole === ACCESS_ENUM.NOT_LOGIN) {
+      next(`/user/login?redirect=${to.fullPath}`)
+      return
+    }
+    // 如果已经登陆了，但是权限不足，那么跳转到无权限页面
+    if (!checkAccess(loginUser, needAccess)) {
+      next('/noAuth')
+      return
+    }
+  }
+  next()
+})
+
+注意，必须保证 pinia 初始化在这段代码执行前，所以需要将 useLoginUserStore（）函数放到router.beforeEach 参数里。
+参考： https://pinia.vuejs.org/core-concepts/outside-component-usage.html
+在 main.ts 中引入import "@/access";，即可生效权限校验:
+
+
+5）支持全局自动登录。如果是**首次**进入页面，状态为未登陆，则自动登录。
+如何区别是否为首次进入页面（还没尝试过获取登录用户）呢？
+默认的loginUser是没有userRole 的，只要获取过，哪怕未登录，也可以给设置一个 userRole为"notLogin"。
+在 access/index.ts 开头补充自动登录逻辑
+
+// 如果之前没登陆过，自动登录
+if (!loginUser || !loginUser.userRole) {
+  // 加 await 是为了等用户登录成功之后，再执行后续的代码
+  await loginUserStore.fetchLoginUser();
+  loginUser = loginUserStore.loginUser;
+}
+
+之后记得移除App.vue中获取登录信息的调用。
+
+
+6）根据权限控制菜单显隐。
+需求：只有具有权限的菜单，才对用户可见
+原理：
+    1.遍历原菜单项列表，针对菜单key 对应的 path 路径，找到路由中对应的 meta 权限配置。只要判断用户没有这个权限，就直接过滤掉。
+    2.还可以通过在路由配置的meta中添加hidelnMenu，灵活控制菜单的显隐。
+
+修改GlobalHeader 全局导航栏（通用菜单）组件，补充根据权限来过滤菜单的逻辑，可自行实现。
+
+// 过滤菜单项
+const items = menus.filter((menu) => {
+  // todo 需要自己实现 menu 到路由 item 的转化
+  const item = menuToRouteItem(menu);
+  if (item.meta?.hideInMenu) {
+    return false;
+  }
+  // 根据权限过滤菜单，有权限则返回 true，则保留该菜单
+  return checkAccess(loginUserStore.loginUser, item.meta?.access as string);
+});
