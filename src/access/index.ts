@@ -4,7 +4,6 @@ import ACCESS_ENUM from './accessEnum'
 import checkAccess from './checkAccess'
 
 router.beforeEach(async (to, from, next) => {
-
   const loginUserStore = useLoginUserStore()
   let loginUser = loginUserStore.loginUser
   console.log('登陆用户信息', loginUser)

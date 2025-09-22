@@ -29,24 +29,36 @@
             <a class="ant-dropdown-link" @click.prevent>
               <a-avatar :size="32" class="user-avatar" :src="loginUserStore.loginUser.userAvatar">
                 <template #icon>
-                  <user-outlined />
+                  <UserOutlined />
                 </template>
               </a-avatar>
               <span class="username">{{ loginUserStore.loginUser.userName }}</span>
-              <down-outlined />
+              <DownOutlined />
             </a>
             <template #overlay>
               <a-menu>
                 <a-menu-item key="1" @click="handleProfile">
-                  <user-outlined />
+                  <UserOutlined />
                   个人中心
                 </a-menu-item>
-                <a-menu-item v-if="checkAccess(loginUserStore.loginUser, 'admin')" key="2" @click="handleManage">
-                  <user-outlined />
-                  管理中心
+                <a-menu-item
+                  v-if="checkAccess(loginUserStore.loginUser, 'admin')"
+                  key="2"
+                  @click="toUserManage"
+                >
+                  <TeamOutlined />
+                  用户管理
+                </a-menu-item>
+                <a-menu-item
+                  v-if="checkAccess(loginUserStore.loginUser, 'admin')"
+                  key="4"
+                  @click="toPictureManage"
+                >
+                  <PictureOutlined />
+                  图片管理
                 </a-menu-item>
                 <a-menu-item key="3" @click="handleLogout">
-                  <logout-outlined />
+                  <LogoutOutlined />
                   退出登录
                 </a-menu-item>
               </a-menu>
@@ -70,11 +82,14 @@
 import { h, ref, computed } from 'vue'
 import {
   GithubOutlined,
+  HeartOutlined,
   HomeOutlined,
-  LinkOutlined,
   UserOutlined,
   DownOutlined,
-  LogoutOutlined
+  LogoutOutlined,
+  TeamOutlined,
+  PictureOutlined,
+  AntDesignOutlined,
 } from '@ant-design/icons-vue'
 import type { MenuProps } from 'ant-design-vue'
 import router from '@/router'
@@ -90,27 +105,37 @@ loginUserStore.fetchLoginUser()
 const menus = ref<MenuProps['items']>([
   {
     key: '/',
+    icon: () => h(HeartOutlined),
+    label: '欢迎',
+    title: '欢迎',
+  },
+  {
+    key: '/home',
     icon: () => h(HomeOutlined),
     label: '主页',
     title: '主页',
   },
   {
-    key: '/about',
-    icon: () => h(LinkOutlined),
-    label: '关于',
-    title: '关于',
+    key: '/add_picture',
+    icon: () => h(PictureOutlined),
+    label: '创建图片',
+    title: '创建图片',
   },
   {
     key: '/author',
     icon: () => h(GithubOutlined),
-    label: h('a', { href: 'https://github.com/X1aoM1ngTX', target: '_blank' }, 'GitHub'),
+    label: h('a', { href: 'https://github.com/X1aoM1ngTX', target: '_blank' }, 'X1aoM1ngTX'),
     title: '作者',
   },
   {
-    key: '/admin/userManage',
-    icon: () => h(UserOutlined),
-    label: '用户管理',
-    title: '用户管理',
+    key: 'antdesign',
+    icon: () => h(AntDesignOutlined),
+    label: h(
+      'a',
+      { href: 'https://www.antdv.com/components/overview-cn/', target: '_blank' },
+      'Ant Design',
+    ),
+    title: 'Ant Design Vue',
   },
 ])
 
@@ -147,19 +172,23 @@ const handleProfile = () => {
 }
 
 // 管理中心
-const handleManage = () => {
+const toUserManage = () => {
   router.push('/admin/userManage')
+}
+
+const toPictureManage = () => {
+  router.push('/admin/pictureManage')
 }
 
 // 退出登录
 const handleLogout = async () => {
-  const res = await userLogoutUsingPost();
+  const res = await userLogoutUsingPost()
   if (res.data.code === 0) {
     loginUserStore.setLoginUser({
       userName: '未登录',
     })
-  message.success('退出登录成功')
-  await router.replace('/user/login')
+    message.success('退出登录成功')
+    await router.replace('/user/login')
   } else {
     message.error('退出登录失败，' + res.data.message)
   }

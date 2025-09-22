@@ -16,12 +16,18 @@
   <div style="margin-bottom: 16px" />
 
   <!-- 表格 -->
-  <a-table layout="inline" :columns="columns" :data-source="dataList" :pagination="pagination" @change="doTableChange">
+  <a-table
+    layout="inline"
+    :columns="columns"
+    :data-source="dataList"
+    :pagination="pagination"
+    @change="doTableChange"
+  >
     <!-- 表格内容 -->
     <template #bodyCell="{ column, record }">
       <!-- ID -->
       <template v-if="column.dataIndex === 'id'">
-        <span @click="copyId(record.id)" style="cursor: pointer;">
+        <span @click="copyId(record.id)" style="cursor: pointer">
           {{ record.id }}
         </span>
       </template>
@@ -44,11 +50,7 @@
             @error="onImageError"
             loading="lazy"
           />
-          <a-avatar
-            v-else
-            :size="40"
-            :style="{ backgroundColor: '#1890ff' }"
-          >
+          <a-avatar v-else :size="40" :style="{ backgroundColor: '#1890ff' }">
             <template #icon>
               <user-outlined />
             </template>
@@ -61,13 +63,13 @@
       </template>
 
       <template v-else-if="column.dataIndex === 'userRole'">
-          <div v-if="record.userRole === 'admin'">
-            <a-tag color="green">管理员</a-tag>
-          </div>
-          <div v-else>
-            <a-tag color="blue">普通用户</a-tag>
-          </div>
-        </template>
+        <div v-if="record.userRole === 'admin'">
+          <a-tag color="green">管理员</a-tag>
+        </div>
+        <div v-else>
+          <a-tag color="blue">普通用户</a-tag>
+        </div>
+      </template>
 
       <template v-if="column.dataIndex === 'createTime'">
         {{ dayjs(record.createTime).format('YYYY-MM-DD HH:mm:ss') }}
@@ -85,18 +87,17 @@
 </template>
 
 <script lang="ts" setup>
-import { listUserVoByPageUsingPost, deleteUserUsingPost } from '@/api/userController';
-import { UserOutlined } from '@ant-design/icons-vue';
-import { message, Modal } from 'ant-design-vue';
-import { computed, onMounted, reactive, ref } from 'vue';
+import { listUserVoByPageUsingPost, deleteUserUsingPost } from '@/api/userController'
+import { UserOutlined } from '@ant-design/icons-vue'
+import { message, Modal } from 'ant-design-vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import dayjs from 'dayjs'
-
 
 // 图片加载失败处理
 const onImageError = (event: Event) => {
-  const img = event.target as HTMLImageElement;
-  img.style.display = 'none';
-};
+  const img = event.target as HTMLImageElement
+  img.style.display = 'none'
+}
 const columns = [
   {
     title: 'ID',
@@ -147,7 +148,7 @@ const searchParams = reactive<API.UserQueryRequest>({
 // 获取数据
 const fetchData = async () => {
   const res = await listUserVoByPageUsingPost({
-    ...searchParams
+    ...searchParams,
   })
   if (res.data.data && res.data.code === 0) {
     dataList.value = res.data.data.records ?? []
@@ -205,13 +206,14 @@ const doDelete = async (id: number) => {
     },
     onCancel: () => {
       message.info('已取消删除')
-    }
+    },
   })
 }
 
 // 复制ID
 const copyId = (id: number) => {
-  navigator.clipboard.writeText(id.toString())
+  navigator.clipboard
+    .writeText(id.toString())
     .then(() => {
       message.success('ID已复制到剪贴板')
     })
@@ -224,7 +226,6 @@ const copyId = (id: number) => {
 onMounted(() => {
   fetchData()
 })
-
 </script>
 
 <style scoped>
@@ -250,6 +251,4 @@ onMounted(() => {
   border-radius: 50%;
   transition: opacity 0.3s ease;
 }
-
 </style>
-
