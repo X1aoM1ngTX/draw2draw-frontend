@@ -150,8 +150,8 @@ const doDelete = async () => {
         const res = await deletePictureUsingPost({ id });
         if (res.data.code === 0) {
           message.success("删除成功");
-          // 删除成功后跳转到首页
-          router.push("/");
+          // 删除成功后跳转到图片库页面
+          router.push("/lib");
         } else {
           message.error("删除失败：" + (res.data.message || "未知错误"));
         }

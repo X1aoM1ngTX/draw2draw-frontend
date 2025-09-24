@@ -1,4 +1,27 @@
 <template>
+  <!-- 标题和操作按钮 -->
+  <div class="header-container">
+    <a-flex justify="space-between">
+      <h2>图片管理</h2>
+      <a-space>
+        <a-tooltip title="刷新">
+          <a-button
+            type="primary"
+            shape="circle"
+            :icon="h(SyncOutlined)"
+            @click="fetchData()"
+          />
+        </a-tooltip>
+        <a-button type="primary" href="/add_picture" target="_blank"
+          >+ 创建图片</a-button
+        >
+        <a-button type="primary" href="/add_picture/batch" target="_blank" ghost
+          >+ 批量创建图片</a-button
+        >
+      </a-space>
+    </a-flex>
+  </div>
+
   <!-- 搜索表单 -->
   <div class="search-form-container">
     <a-form layout="inline" :model="searchParams" @finish="doSearch">
@@ -27,7 +50,7 @@
       </a-form-item>
       <a-form-item label="审核状态" name="reviewStatus">
         <a-select
-          style="width: 180px;"
+          style="width: 180px"
           v-model:value="searchParams.reviewStatus"
           :options="PIC_REVIEW_STATUS_OPTIONS"
           placeholder="请输入审核状态"
@@ -54,7 +77,7 @@
     <template #bodyCell="{ column, record }">
       <!-- ID -->
       <template v-if="column.dataIndex === 'id'">
-        <span @click="copyId(record.id)" style="cursor: pointer">
+        <span @click="copyId(record.id)" style="cursor: pointer" title="点击复制ID">
           {{ record.id }}
         </span>
       </template>
@@ -78,6 +101,12 @@
         <div>宽高比：{{ record.picScale }}</div>
         <div>大小： {{ (record.picSize / 1024).toFixed(2) }}KB</div>
       </template>
+      <!-- 用户ID -->
+       <template v-else-if="column.dataIndex === 'userId'">
+        <span @click="copyId(record.userId)" style="cursor: pointer" title="点击复制ID">
+          {{ record.userId }}
+        </span>
+       </template>
       <!-- 审核信息 -->
       <template v-if="column.dataIndex === 'reviewInfo'">
         <div>审核状态：{{ PIC_REVIEW_STATUS_MAP[record.reviewStatus] }}</div>
@@ -107,7 +136,9 @@
           type="link"
           danger
           :disabled="record.reviewStatus === PIC_REVIEW_STATUS_ENUM.REJECT"
-          @click="showReviewConfirm(record, PIC_REVIEW_STATUS_ENUM.REJECT, '拒绝')"
+          @click="
+            showReviewConfirm(record, PIC_REVIEW_STATUS_ENUM.REJECT, '拒绝')
+          "
           >拒绝</a-button
         >
         <a-button type="link" danger @click="doDelete(record.id)"
@@ -127,7 +158,8 @@
 
 <script lang="ts" setup>
 import { message, Modal } from "ant-design-vue";
-import { computed, onMounted, reactive, ref } from "vue";
+import { SyncOutlined } from "@ant-design/icons-vue";
+import { computed, onMounted, reactive, ref, h } from "vue";
 import dayjs from "dayjs";
 import {
   listPictureByPageUsingPost,
@@ -288,7 +320,11 @@ const doDelete = async (id: number) => {
 };
 
 // 显示审核确认框
-const showReviewConfirm = (record: API.Picture, reviewStatus: number, actionText: string) => {
+const showReviewConfirm = (
+  record: API.Picture,
+  reviewStatus: number,
+  actionText: string
+) => {
   Modal.confirm({
     title: `确认${actionText}`,
     content: `确定要${actionText}该图片吗？`,
@@ -327,6 +363,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.header-container {
+  margin-bottom: 16px;
+}
+
 .search-form-container {
   display: flex;
   justify-content: center;
