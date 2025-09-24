@@ -9,9 +9,9 @@
 </template>
 
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
-import GlobalHeader from './GlobalHeader.vue'
-import GlobalFooter from './GlobalFooter.vue'
+import { RouterView } from "vue-router";
+import GlobalHeader from "./GlobalHeader.vue";
+import GlobalFooter from "./GlobalFooter.vue";
 </script>
 
 <style scoped>

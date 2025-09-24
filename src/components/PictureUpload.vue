@@ -17,60 +17,60 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { PlusOutlined, LoadingOutlined } from '@ant-design/icons-vue'
-import { message } from 'ant-design-vue'
-import type { UploadProps } from 'ant-design-vue'
-import { uploadPictureUsingPost } from '@/api/pictureController'
+import { ref } from "vue";
+import { PlusOutlined, LoadingOutlined } from "@ant-design/icons-vue";
+import { message } from "ant-design-vue";
+import type { UploadProps } from "ant-design-vue";
+import { uploadPictureUsingPost } from "@/api/pictureController";
 
 interface Props {
-  picture?: API.PictureVO
-  onSuccess?: (nesPicture: API.PictureVO) => void
+  picture?: API.PictureVO;
+  onSuccess?: (nesPicture: API.PictureVO) => void;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 /**
  * 上传图片
  */
 const handleUpload = async ({ file }: any) => {
-  loading.value = true
+  loading.value = true;
   try {
-    const params = props.picture ? { id: props.picture.id } : {}
-    const res = await uploadPictureUsingPost(params, {}, file)
+    const params = props.picture ? { id: props.picture.id } : {};
+    const res = await uploadPictureUsingPost(params, {}, file);
     if (res.data.code === 0 && res.data.data) {
-      message.success('图片上传成功')
-      props.onSuccess?.(res.data.data)
+      message.success("图片上传成功");
+      props.onSuccess?.(res.data.data);
     } else {
-      message.error('图片上传失败,' + res.data.message)
+      message.error("图片上传失败," + res.data.message);
     }
   } catch (error) {
-    console.error('图片上传失败' + error)
-    message.error('图片上传失败,' + res.data.message)
+    console.error("图片上传失败" + error);
+    message.error("图片上传失败," + res.data.message);
   }
 
-  loading.value = false
-}
+  loading.value = false;
+};
 
-const loading = ref<boolean>(false)
+const loading = ref<boolean>(false);
 
 /**
  * 上传图片之前的校验
  * @param file
  */
-const beforeUpload = (file: UploadProps['fileList'][number]) => {
+const beforeUpload = (file: UploadProps["fileList"][number]) => {
   // 判断图片格式
-  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png'
+  const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
   if (!isJpgOrPng) {
-    message.error('不支持的图片格式!请上传 JPG/PNG 格式的图片')
+    message.error("不支持的图片格式!请上传 JPG/PNG 格式的图片");
   }
   // 判断图片大小
-  const isLt2M = file.size / 1024 / 1024 < 2
+  const isLt2M = file.size / 1024 / 1024 < 2;
   if (!isLt2M) {
-    message.error('图片大小不能超过 2MB!')
+    message.error("图片大小不能超过 2MB!");
   }
-  return isJpgOrPng && isLt2M
-}
+  return isJpgOrPng && isLt2M;
+};
 </script>
 
 <style scoped>

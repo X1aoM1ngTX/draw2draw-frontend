@@ -5,7 +5,7 @@
       <a-col flex="200px" class="logo-col">
         <router-link to="/" class="logo-link">
           <div class="title-bar">
-            <img class="logo" src="../assets/Game9/game9-blue.png" alt="logo" />
+            <img class="logo" src="../assets/d2d.png" alt="logo" />
             <div class="title">Draw2Draw</div>
           </div>
         </router-link>
@@ -24,20 +24,29 @@
 
       <!-- 用户区域 -->
       <a-col flex="220px" class="user-col">
-        <div v-if="loginUserStore.loginUser.userName !== '未登录'" class="user-info">
+        <div
+          v-if="loginUserStore.loginUser.userName !== '未登录'"
+          class="user-info"
+        >
           <a-dropdown>
             <a class="ant-dropdown-link" @click.prevent>
-              <a-avatar :size="32" class="user-avatar" :src="loginUserStore.loginUser.userAvatar">
+              <a-avatar
+                :size="32"
+                class="user-avatar"
+                :src="loginUserStore.loginUser.userAvatar"
+              >
                 <template #icon>
                   <UserOutlined />
                 </template>
               </a-avatar>
-              <span class="username">{{ loginUserStore.loginUser.userName }}</span>
+              <span class="username">{{
+                loginUserStore.loginUser.userName
+              }}</span>
               <DownOutlined />
             </a>
             <template #overlay>
               <a-menu>
-                <a-menu-item key="1" @click="handleProfile">
+                <a-menu-item key="1" @click="toProfile">
                   <UserOutlined />
                   个人中心
                 </a-menu-item>
@@ -66,10 +75,18 @@
           </a-dropdown>
         </div>
         <div v-else class="auth-buttons">
-          <a-button type="text" @click="router.push('/user/login')" class="login-btn">
+          <a-button
+            type="text"
+            @click="router.push('/user/login')"
+            class="login-btn"
+          >
             登录
           </a-button>
-          <a-button type="primary" @click="router.push('/user/register')" class="register-btn">
+          <a-button
+            type="primary"
+            @click="router.push('/user/register')"
+            class="register-btn"
+          >
             注册
           </a-button>
         </div>
@@ -79,120 +96,102 @@
 </template>
 
 <script lang="ts" setup>
-import { h, ref, computed } from 'vue'
+import { h, ref, computed } from "vue";
 import {
-  GithubOutlined,
   HeartOutlined,
-  HomeOutlined,
+  AppstoreOutlined,
   UserOutlined,
   DownOutlined,
   LogoutOutlined,
   TeamOutlined,
   PictureOutlined,
-  AntDesignOutlined,
-} from '@ant-design/icons-vue'
-import type { MenuProps } from 'ant-design-vue'
-import router from '@/router'
-import { useLoginUserStore } from '@/stores/useLoginUserStore'
-import { message } from 'ant-design-vue'
-import { userLogoutUsingPost } from '@/api/userController'
-import checkAccess from '@/access/checkAccess'
+} from "@ant-design/icons-vue";
+import type { MenuProps } from "ant-design-vue";
+import router from "@/router";
+import { useLoginUserStore } from "@/stores/useLoginUserStore";
+import { message } from "ant-design-vue";
+import { userLogoutUsingPost } from "@/api/userController";
+import checkAccess from "@/access/checkAccess";
 
-const loginUserStore = useLoginUserStore()
-loginUserStore.fetchLoginUser()
+const loginUserStore = useLoginUserStore();
+loginUserStore.fetchLoginUser();
 
 // 原始菜单项
-const menus = ref<MenuProps['items']>([
+const menus = ref<MenuProps["items"]>([
   {
-    key: '/',
+    key: "/",
     icon: () => h(HeartOutlined),
-    label: '欢迎',
-    title: '欢迎',
+    label: "欢迎",
+    title: "欢迎",
   },
   {
-    key: '/home',
-    icon: () => h(HomeOutlined),
-    label: '主页',
-    title: '主页',
+    key: "/lib",
+    icon: () => h(AppstoreOutlined),
+    label: "图库",
+    title: "图库",
   },
   {
-    key: '/add_picture',
+    key: "/add_picture",
     icon: () => h(PictureOutlined),
-    label: '创建图片',
-    title: '创建图片',
+    label: "创建",
+    title: "创建",
   },
-  {
-    key: '/author',
-    icon: () => h(GithubOutlined),
-    label: h('a', { href: 'https://github.com/X1aoM1ngTX', target: '_blank' }, 'X1aoM1ngTX'),
-    title: '作者',
-  },
-  {
-    key: 'antdesign',
-    icon: () => h(AntDesignOutlined),
-    label: h(
-      'a',
-      { href: 'https://www.antdv.com/components/overview-cn/', target: '_blank' },
-      'Ant Design',
-    ),
-    title: 'Ant Design Vue',
-  },
-])
+]);
 
 // 根据权限过滤菜单项
 const items = computed(() => {
-  if (!menus.value) return []
+  if (!menus.value) return [];
   return menus.value.filter((menu): menu is Exclude<typeof menu, null> => {
-    if (!menu || !menu.key) return false
+    if (!menu || !menu.key) return false;
     // 获取菜单项对应的路由
-    const route = router.resolve(menu.key as string)
+    const route = router.resolve(menu.key as string);
     // 检查用户是否有权限访问该路由
-    return checkAccess(loginUserStore.loginUser, route.meta?.access as string)
-  })
-})
+    return checkAccess(loginUserStore.loginUser, route.meta?.access as string);
+  });
+});
 
 // 当前选中的菜单
-const current = ref<string[]>([])
+const current = ref<string[]>([]);
 
 // 菜单点击事件
 const doMenuClick = ({ key }: { key: string }) => {
   router.push({
     path: key,
-  })
-}
+  });
+};
 
 // 监听路由变化，更新当前选中的菜单
 router.afterEach((to) => {
-  current.value = [to.path]
-})
+  current.value = [to.path];
+});
 
 // 个人中心
-const handleProfile = () => {
-  message.info('个人中心功能开发中')
-}
+const toProfile = () => {
+  router.push("/user/profile");
+};
 
 // 管理中心
 const toUserManage = () => {
-  router.push('/admin/userManage')
-}
+  router.push("/admin/userManage");
+};
 
 const toPictureManage = () => {
-  router.push('/admin/pictureManage')
-}
+  router.push("/admin/pictureManage");
+};
 
 // 退出登录
 const handleLogout = async () => {
-  const res = await userLogoutUsingPost()
+  const res = await userLogoutUsingPost();
   if (res.data.code === 0) {
     loginUserStore.setLoginUser({
-      userName: '未登录',
-    })
-    message.success('退出登录成功')
-    await router.replace('/user/login')
+      userName: "未登录",
+    });
+    message.success("退出登录成功");
+    await router.replace("/user/login");
   } else {
-    message.error('退出登录失败，' + res.data.message)
+    message.error("退出登录失败，" + res.data.message);
   }
-}
+};
 </script>
 
 <style scoped>

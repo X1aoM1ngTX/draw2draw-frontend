@@ -19,7 +19,11 @@
               >
                 立即开始
               </a-button>
-              <a-button size="large" @click="router.push('/about')" style="margin-left: 16px">
+              <a-button
+                size="large"
+                @click="router.push('/about')"
+                style="margin-left: 16px"
+              >
                 了解更多
               </a-button>
             </div>
@@ -27,7 +31,7 @@
         </a-col>
         <a-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
           <div class="welcome-image">
-            <img src="../assets/Game9/game9-blue.png" alt="Draw2Draw" />
+            <img src="../assets/d2d.png" alt="Draw2Draw" />
           </div>
         </a-col>
       </a-row>
@@ -88,7 +92,9 @@
               </div>
             </template>
             <a-card-meta title="云端存储">
-              <template #description> 所有绘图内容自动保存到云端，随时随地访问您的作品 </template>
+              <template #description>
+                所有绘图内容自动保存到云端，随时随地访问您的作品
+              </template>
             </a-card-meta>
           </a-card>
         </a-col>
@@ -105,7 +111,9 @@
               </div>
             </template>
             <a-card-meta title="安全可靠">
-              <template #description> 采用多层安全措施，保护您的数据和隐私安全 </template>
+              <template #description>
+                采用多层安全措施，保护您的数据和隐私安全
+              </template>
             </a-card-meta>
           </a-card>
         </a-col>
@@ -145,7 +153,12 @@
       <h2 class="cta-title">准备好开始您的创作之旅了吗？</h2>
       <p class="cta-desc">加入Draw2Draw，释放您的创造力</p>
       <div class="cta-actions">
-        <a-button type="primary" size="large" @click="router.push('/user/login')" v-if="!loginUser">
+        <a-button
+          type="primary"
+          size="large"
+          @click="router.push('/user/login')"
+          v-if="!loginUser"
+        >
           立即开始
         </a-button>
         <a-button
@@ -156,27 +169,31 @@
         >
           免费注册
         </a-button>
-        <a-button type="primary" size="large" @click="goToDrawing" v-if="loginUser">
+        <a-button
+          type="primary"
+          size="large"
+          @click="goToDrawing"
+          v-if="loginUser"
+        >
           开始绘图
         </a-button>
       </div>
     </div>
   </div>
+  <a-back-top />
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useLoginUserStore } from '@/stores/useLoginUserStore'
-import router from '@/router'
-import { message } from 'ant-design-vue'
+import { computed } from "vue";
+import { useLoginUserStore } from "@/stores/useLoginUserStore";
+import router from "@/router";
 
-const loginUserStore = useLoginUserStore()
-const loginUser = computed(() => loginUserStore.loginUser)
+const loginUserStore = useLoginUserStore();
+const loginUser = computed(() => loginUserStore.loginUser);
 
 const goToDrawing = () => {
-  // 这里可以根据实际需求跳转到绘图页面
-  message.info('绘图功能开发中，敬请期待！')
-}
+  router.push("/add_picture");
+};
 </script>
 
 <style scoped>

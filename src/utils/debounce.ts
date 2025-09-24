@@ -6,11 +6,11 @@
  */
 export const debounce = <T extends (...args: any[]) => void>(
   fn: T,
-  delay: number,
+  delay: number
 ): ((...args: Parameters<T>) => void) => {
-  let timer: ReturnType<typeof setTimeout>
+  let timer: ReturnType<typeof setTimeout>;
   return function (this: any, ...args: Parameters<T>) {
-    clearTimeout(timer)
-    timer = setTimeout(() => fn.apply(this, args), delay)
-  }
-}
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+};

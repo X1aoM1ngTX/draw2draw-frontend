@@ -13,7 +13,11 @@
     <!-- 分类&标签 -->
     <a-tabs v-model:activeKey="selectedCategory" @change="doSearch">
       <a-tab-pane tab="全部" key="all" />
-      <a-tab-pane v-for="category in categoryList" :tab="category" :key="category" />
+      <a-tab-pane
+        v-for="category in categoryList"
+        :tab="category"
+        :key="category"
+      />
     </a-tabs>
     <div class="tag-bar">
       <span style="margin-right: 8px">标签：</span>
@@ -50,7 +54,7 @@
               <template #description>
                 <a-flex>
                   <a-tag color="green">
-                    {{ picture.category ?? '默认' }}
+                    {{ picture.category ?? "默认" }}
                   </a-tag>
                   <a-tag v-for="tag in picture.tags" :key="tag">
                     {{ tag }}
@@ -63,29 +67,29 @@
       </template>
     </a-list>
   </div>
-  <!-- 图片列表 -->
+  <a-back-top />
 </template>
 <script lang="ts" setup>
 import {
   listPictureTagCategoryUsingGet,
   listPictureVoByPageUsingPost,
-} from '@/api/pictureController'
-import router from '@/router'
-import { message } from 'ant-design-vue'
-import { computed, onMounted, reactive, ref } from 'vue'
+} from "@/api/pictureController";
+import router from "@/router";
+import { message } from "ant-design-vue";
+import { computed, onMounted, reactive, ref } from "vue";
 
 // 数据
-const dataList = ref<API.PictureVO[]>([])
-const total = ref(0)
-const loading = ref(true)
+const dataList = ref<API.PictureVO[]>([]);
+const total = ref(0);
+const loading = ref(true);
 
 // 搜索条件
 const searchParams = reactive<API.PictureQueryRequest>({
   current: 1,
-  pageSize: 10,
-  sortField: 'createTime',
-  sortOrder: 'descend',
-})
+  pageSize: 20,
+  sortField: "createTime",
+  sortOrder: "descend",
+});
 
 // 分页参数
 const pagination = computed(() => {
@@ -94,79 +98,79 @@ const pagination = computed(() => {
     pageSize: searchParams.pageSize ?? 10,
     total: total.value,
     // 切换页号时，会修改搜索参数并获取数据
-    onChange: (page, pageSize) => {
-      searchParams.current = page
-      searchParams.pageSize = pageSize
-      fetchData()
+    onChange: (page: number, pageSize: number) => {
+      searchParams.current = page;
+      searchParams.pageSize = pageSize;
+      fetchData();
     },
-  }
-})
+  };
+});
 
 // 获取数据
 const fetchData = async () => {
-  loading.value = true
+  loading.value = true;
   // 转换搜索参数
   const params = {
     ...searchParams,
     tags: [] as string[],
-  }
-  if (selectedCategory.value !== 'all') {
-    params.category = selectedCategory.value
+  };
+  if (selectedCategory.value !== "all") {
+    params.category = selectedCategory.value;
   }
   selectedTagList.value.forEach((useTag, index) => {
     if (useTag) {
-      params.tags.push(tagList.value[index])
+      params.tags.push(tagList.value[index]);
     }
-  })
-  const res = await listPictureVoByPageUsingPost(params)
+  });
+  const res = await listPictureVoByPageUsingPost(params);
   if (res.data.data) {
-    dataList.value = res.data.data.records ?? []
-    total.value = res.data.data.total ?? 0
+    dataList.value = res.data.data.records ?? [];
+    total.value = res.data.data.total ?? 0;
   } else {
-    message.error('获取数据失败，' + res.data.message)
+    message.error("获取数据失败，" + res.data.message);
   }
-  loading.value = false
-}
+  loading.value = false;
+};
 
 // 搜索
 const doSearch = () => {
   // 重置页码
-  searchParams.current = 1
-  fetchData()
-}
+  searchParams.current = 1;
+  fetchData();
+};
 
 // 点击图片
 const doClickPicture = (picture: API.PictureVO) => {
   router.push({
     path: `/picture/${picture.id}`,
-  })
-}
+  });
+};
 
 // 图片分类和标签
-const categoryList = ref<string[]>([])
-const selectedCategory = ref<string>('all')
-const tagList = ref<string[]>([])
-const selectedTagList = ref<string[]>([])
+const categoryList = ref<string[]>([]);
+const selectedCategory = ref<string>("all");
+const tagList = ref<string[]>([]);
+const selectedTagList = ref<string[]>([]);
 
 /**
  * 获取图片分类和标签
  * @param value
  */
 const getTagCategoryOptions = async () => {
-  const res = await listPictureTagCategoryUsingGet()
+  const res = await listPictureTagCategoryUsingGet();
   if (res.data.data && res.data.code === 0) {
-    tagList.value = res.data.data.tagList ?? []
-    categoryList.value = res.data.data.categoryList ?? []
+    tagList.value = res.data.data.tagList ?? [];
+    categoryList.value = res.data.data.categoryList ?? [];
   } else {
-    message.success('获取标签分类失败：' + res.data.message)
+    message.success("获取标签分类失败：" + res.data.message);
   }
-}
+};
 
 // 页面加载时请求一次
 onMounted(() => {
-  fetchData()
-  getTagCategoryOptions()
-})
+  fetchData();
+  getTagCategoryOptions();
+});
 </script>
 <style scoped>
 .search-bar {

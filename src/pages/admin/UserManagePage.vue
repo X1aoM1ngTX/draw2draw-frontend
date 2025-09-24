@@ -3,10 +3,18 @@
   <div class="search-form-container">
     <a-form layout="inline" :model="searchParams" @finish="doSearch">
       <a-form-item label="账号">
-        <a-input v-model:value="searchParams.userAccount" placeholder="输入账号" allow-clear />
+        <a-input
+          v-model:value="searchParams.userAccount"
+          placeholder="输入账号"
+          allow-clear
+        />
       </a-form-item>
       <a-form-item label="用户名">
-        <a-input v-model:value="searchParams.userName" placeholder="输入用户名" allow-clear />
+        <a-input
+          v-model:value="searchParams.userName"
+          placeholder="输入用户名"
+          allow-clear
+        />
       </a-form-item>
       <a-form-item>
         <a-button type="primary" html-type="submit">搜索</a-button>
@@ -37,7 +45,7 @@
       </template>
 
       <template v-else-if="column.dataIndex === 'userName'">
-        {{ record.userName || '-' }}
+        {{ record.userName || "-" }}
       </template>
 
       <template v-else-if="column.dataIndex === 'userAvatar'">
@@ -59,7 +67,7 @@
       </template>
 
       <template v-else-if="column.dataIndex === 'userProfile'">
-        {{ record.userProfile || '-' }}
+        {{ record.userProfile || "-" }}
       </template>
 
       <template v-else-if="column.dataIndex === 'userRole'">
@@ -72,7 +80,7 @@
       </template>
 
       <template v-if="column.dataIndex === 'createTime'">
-        {{ dayjs(record.createTime).format('YYYY-MM-DD HH:mm:ss') }}
+        {{ dayjs(record.createTime).format("YYYY-MM-DD HH:mm:ss") }}
       </template>
 
       <template v-else-if="column.dataIndex === 'updateTime'">
@@ -84,79 +92,83 @@
       </template>
     </template>
   </a-table>
+  <a-back-top />
 </template>
 
 <script lang="ts" setup>
-import { listUserVoByPageUsingPost, deleteUserUsingPost } from '@/api/userController'
-import { UserOutlined } from '@ant-design/icons-vue'
-import { message, Modal } from 'ant-design-vue'
-import { computed, onMounted, reactive, ref } from 'vue'
-import dayjs from 'dayjs'
+import {
+  listUserVoByPageUsingPost,
+  deleteUserUsingPost,
+} from "@/api/userController";
+import { UserOutlined } from "@ant-design/icons-vue";
+import { message, Modal } from "ant-design-vue";
+import { computed, onMounted, reactive, ref } from "vue";
+import dayjs from "dayjs";
 
 // 图片加载失败处理
 const onImageError = (event: Event) => {
-  const img = event.target as HTMLImageElement
-  img.style.display = 'none'
-}
+  const img = event.target as HTMLImageElement;
+  img.style.display = "none";
+};
 const columns = [
   {
-    title: 'ID',
-    dataIndex: 'id',
+    title: "ID",
+    dataIndex: "id",
   },
   {
-    title: '账号',
-    dataIndex: 'userAccount',
+    title: "账号",
+    dataIndex: "userAccount",
   },
   {
-    title: '用户名',
-    dataIndex: 'userName',
+    title: "用户名",
+    dataIndex: "userName",
   },
   {
-    title: '头像',
-    dataIndex: 'userAvatar',
+    title: "头像",
+    dataIndex: "userAvatar",
   },
   {
-    title: '简介',
-    dataIndex: 'userProfile',
+    title: "简介",
+    dataIndex: "userProfile",
   },
   {
-    title: '用户角色',
-    dataIndex: 'userRole',
+    title: "用户角色",
+    dataIndex: "userRole",
   },
   {
-    title: '创建时间',
-    dataIndex: 'createTime',
+    title: "创建时间",
+    dataIndex: "createTime",
   },
   {
-    title: '操作',
-    key: 'action',
+    title: "操作",
+    key: "action",
   },
-]
+];
 
 // 数据
-const dataList = ref<API.UserVO[]>([])
-const total = ref(0)
+const dataList = ref<API.UserVO[]>([]);
+const total = ref(0);
 
 // 搜索条件
 const searchParams = reactive<API.UserQueryRequest>({
   current: 1,
   pageSize: 10,
-  sortField: 'createTime',
-  sortOrder: 'ascend',
-})
+  sortField: "createTime",
+  sortOrder: "ascend",
+});
 
 // 获取数据
 const fetchData = async () => {
   const res = await listUserVoByPageUsingPost({
     ...searchParams,
-  })
+  });
   if (res.data.data && res.data.code === 0) {
-    dataList.value = res.data.data.records ?? []
-    total.value = res.data.data.total ?? 0
+    dataList.value = res.data.data.records ?? [];
+    total.value = res.data.data.total ?? 0;
   } else {
-    message.error('获取数据失败，' + res.data.message)
+    message.error("获取数据失败，" + res.data.message);
   }
-}
+};
 
 // 分页参数
 const pagination = computed(() => {
@@ -166,66 +178,66 @@ const pagination = computed(() => {
     total: total.value,
     showSizeChanger: true,
     showTotal: (total) => `共 ${total} 条`,
-  }
-})
+  };
+});
 
 // 表格变化之后，重新获取数据
 const doTableChange = (page: any) => {
-  searchParams.current = page.current
-  searchParams.pageSize = page.pageSize
-  fetchData()
-}
+  searchParams.current = page.current;
+  searchParams.pageSize = page.pageSize;
+  fetchData();
+};
 
 // 搜索数据
 const doSearch = () => {
   // 重置页码
-  searchParams.current = 1
-  fetchData()
-}
+  searchParams.current = 1;
+  fetchData();
+};
 
 // 删除数据
 const doDelete = async (id: number) => {
   if (!id) {
-    return
+    return;
   }
 
   Modal.confirm({
-    title: '确认删除',
-    content: '确定要删除该用户吗？此操作不可恢复。',
-    okText: '确认',
-    cancelText: '取消',
+    title: "确认删除",
+    content: "确定要删除该用户吗？此操作不可恢复。",
+    okText: "确认",
+    cancelText: "取消",
     onOk: async () => {
-      const res = await deleteUserUsingPost({ userId: id.toString() })
+      const res = await deleteUserUsingPost({ userId: id.toString() });
       if (res.data.code === 0) {
-        message.success('删除成功')
+        message.success("删除成功");
         // 刷新数据
-        fetchData()
+        fetchData();
       } else {
-        message.error('删除失败')
+        message.error("删除失败");
       }
     },
     onCancel: () => {
-      message.info('已取消删除')
+      message.info("已取消删除");
     },
-  })
-}
+  });
+};
 
 // 复制ID
 const copyId = (id: number) => {
   navigator.clipboard
     .writeText(id.toString())
     .then(() => {
-      message.success('ID已复制到剪贴板')
+      message.success("ID已复制到剪贴板");
     })
     .catch(() => {
-      message.error('复制失败，请手动复制')
-    })
-}
+      message.error("复制失败，请手动复制");
+    });
+};
 
 // 页面加载时请求一次
 onMounted(() => {
-  fetchData()
-})
+  fetchData();
+});
 </script>
 
 <style scoped>

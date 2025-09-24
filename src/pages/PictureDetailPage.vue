@@ -3,7 +3,10 @@
     <!-- 图片展示区 -->
     <a-col :sm="24" :md="16" :xl="18">
       <a-card title="图片预览">
-        <a-image style="max-height: 600px; object-fit: contain" :src="picture.url" />
+        <a-image
+          style="max-height: 600px; object-fit: contain"
+          :src="picture.url"
+        />
       </a-card>
     </a-col>
     <!-- 图片信息区 -->
@@ -17,13 +20,13 @@
             </a-space>
           </a-descriptions-item>
           <a-descriptions-item label="名称">
-            {{ picture.name ?? '未命名' }}
+            {{ picture.name ?? "未命名" }}
           </a-descriptions-item>
           <a-descriptions-item label="简介">
-            {{ picture.introduction ?? '-' }}
+            {{ picture.introduction ?? "-" }}
           </a-descriptions-item>
           <a-descriptions-item label="分类">
-            {{ picture.category ?? '默认' }}
+            {{ picture.category ?? "默认" }}
           </a-descriptions-item>
           <a-descriptions-item label="标签">
             <div class="tag-container">
@@ -33,16 +36,16 @@
             </div>
           </a-descriptions-item>
           <a-descriptions-item label="格式">
-            {{ picture.picFormat ?? '-' }}
+            {{ picture.picFormat ?? "-" }}
           </a-descriptions-item>
           <a-descriptions-item label="宽度">
-            {{ picture.picWidth ?? '-' }}
+            {{ picture.picWidth ?? "-" }}
           </a-descriptions-item>
           <a-descriptions-item label="高度">
-            {{ picture.picHeight ?? '-' }}
+            {{ picture.picHeight ?? "-" }}
           </a-descriptions-item>
           <a-descriptions-item label="宽高比">
-            {{ picture.picScale ?? '-' }}
+            {{ picture.picScale ?? "-" }}
           </a-descriptions-item>
           <a-descriptions-item label="大小">
             {{ formatSize(picture.picSize) }}
@@ -74,96 +77,102 @@
 </template>
 
 <script lang="ts" setup>
-import { deletePictureUsingPost, getPictureVoByIdUsingGet } from '@/api/pictureController'
-import { message, Modal } from 'ant-design-vue'
-import { onMounted, ref, computed } from 'vue'
-import { EditOutlined, DeleteOutlined, DownloadOutlined } from '@ant-design/icons-vue'
-import { downloadImage, formatSize } from '@/utils'
-import router from '@/router'
-import { useLoginUserStore } from '@/stores/useLoginUserStore'
+import {
+  deletePictureUsingPost,
+  getPictureVoByIdUsingGet,
+} from "@/api/pictureController";
+import { message, Modal } from "ant-design-vue";
+import { onMounted, ref, computed } from "vue";
+import {
+  EditOutlined,
+  DeleteOutlined,
+  DownloadOutlined,
+} from "@ant-design/icons-vue";
+import { downloadImage, formatSize } from "@/utils";
+import router from "@/router";
+import { useLoginUserStore } from "@/stores/useLoginUserStore";
 
 const props = defineProps<{
-  id: string | number
-}>()
+  id: string | number;
+}>();
 
-const picture = ref<API.PictureVO>({})
+const picture = ref<API.PictureVO>({});
 
 // 获取图片详情
 const fetchPictureDetail = async () => {
   try {
     const res = await getPictureVoByIdUsingGet({
       id: props.id,
-    })
+    });
     if (res.data.code === 0 && res.data.data) {
-      picture.value = res.data.data
+      picture.value = res.data.data;
     } else {
-      message.error('获取图片详情失败，' + res.data.message)
+      message.error("获取图片详情失败，" + res.data.message);
     }
   } catch (e: any) {
-    message.error('获取图片详情失败：' + e.message)
+    message.error("获取图片详情失败：" + e.message);
   }
-}
+};
 
 // 是否登录
-const loginUserStore = useLoginUserStore()
+const loginUserStore = useLoginUserStore();
 // 是否具有编辑权限
 const canEdit = computed(() => {
-  const loginUser = loginUserStore.loginUser
+  const loginUser = loginUserStore.loginUser;
   // 未登录不可编辑
   if (!loginUser.id) {
-    return false
+    return false;
   }
   // 仅本人或管理员可编辑
-  const user = picture.value.user || {}
-  return loginUser.id === user.id || loginUser.userRole === 'admin'
-})
+  const user = picture.value.user || {};
+  return loginUser.id === user.id || loginUser.userRole === "admin";
+});
 
 // 编辑
 const doEdit = () => {
-  router.push('/add_picture?id=' + picture.value.id)
-}
+  router.push("/add_picture?id=" + picture.value.id);
+};
 // 删除
 const doDelete = async () => {
-  const id = picture.value.id
+  const id = picture.value.id;
   if (!id) {
-    return
+    return;
   }
 
   Modal.confirm({
-    title: '确认删除',
-    content: '确定要删除这张图片吗？删除后不可恢复。',
-    okText: '确认',
-    cancelText: '取消',
-    okType: 'danger',
+    title: "确认删除",
+    content: "确定要删除这张图片吗？删除后不可恢复。",
+    okText: "确认",
+    cancelText: "取消",
+    okType: "danger",
     onOk: async () => {
       try {
-        const res = await deletePictureUsingPost({ id })
+        const res = await deletePictureUsingPost({ id });
         if (res.data.code === 0) {
-          message.success('删除成功')
+          message.success("删除成功");
           // 删除成功后跳转到首页
-          router.push('/')
+          router.push("/");
         } else {
-          message.error('删除失败：' + (res.data.message || '未知错误'))
+          message.error("删除失败：" + (res.data.message || "未知错误"));
         }
       } catch (e: any) {
-        message.error('删除失败：' + e.message)
+        message.error("删除失败：" + e.message);
       }
     },
     onCancel() {
       // 用户取消删除操作
     },
-  })
-}
+  });
+};
 
 // 下载
 const doDownload = () => {
-  downloadImage(picture.value.url)
-}
-
+  downloadImage(picture.value.url);
+};
 
 onMounted(() => {
-  fetchPictureDetail()
-})
+  fetchPictureDetail();
+});
 </script>
 
 <style scoped>
