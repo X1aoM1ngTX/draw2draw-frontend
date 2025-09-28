@@ -171,7 +171,9 @@ export async function uploadUserAvatarUsingPost(
   return request<API.BaseResponseString_>("/api/user/upload/avatar", {
     method: "POST",
     data: formData,
-    requestType: "form",
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
     ...(options || {}),
   });
 }
