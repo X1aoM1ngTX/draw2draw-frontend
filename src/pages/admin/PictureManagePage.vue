@@ -77,7 +77,11 @@
     <template #bodyCell="{ column, record }">
       <!-- ID -->
       <template v-if="column.dataIndex === 'id'">
-        <span @click="copyId(record.id)" style="cursor: pointer" title="点击复制ID">
+        <span
+          @click="copyId(record.id)"
+          style="cursor: pointer"
+          title="点击复制ID"
+        >
           {{ record.id }}
         </span>
       </template>
@@ -102,11 +106,15 @@
         <div>大小： {{ (record.picSize / 1024).toFixed(2) }}KB</div>
       </template>
       <!-- 用户ID -->
-       <template v-else-if="column.dataIndex === 'userId'">
-        <span @click="copyId(record.userId)" style="cursor: pointer" title="点击复制ID">
+      <template v-else-if="column.dataIndex === 'userId'">
+        <span
+          @click="copyId(record.userId)"
+          style="cursor: pointer"
+          title="点击复制ID"
+        >
           {{ record.userId }}
         </span>
-       </template>
+      </template>
       <!-- 审核信息 -->
       <template v-if="column.dataIndex === 'reviewInfo'">
         <div>审核状态：{{ PIC_REVIEW_STATUS_MAP[record.reviewStatus] }}</div>
@@ -257,6 +265,7 @@ const pagination = computed(() => {
 const fetchData = async () => {
   const res = await listPictureByPageUsingPost({
     ...searchParams,
+    nullSpaceId: true,
   });
   if (res.data.data && res.data.code === 0) {
     dataList.value = res.data.data.records ?? [];

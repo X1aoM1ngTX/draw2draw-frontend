@@ -2,7 +2,7 @@
   <div id="basicLayout">
     <a-layout style="min-height: 100vh">
       <a-layout-header class="header"><GlobalHeader /></a-layout-header>
-      <a-layout-content class="content"><RouterView /></a-layout-content>
+      <a-layout-content class="content-full-width"><RouterView /></a-layout-content>
       <a-layout-footer class="footer"><GlobalFooter /></a-layout-footer>
     </a-layout>
   </div>
@@ -15,8 +15,8 @@ import GlobalFooter from "./GlobalFooter.vue";
 </script>
 
 <style scoped>
-* {
-  background-color: #fff;
+#basicLayout {
+  min-height: 100vh;
 }
 
 .header {
@@ -31,21 +31,26 @@ import GlobalFooter from "./GlobalFooter.vue";
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.content {
+.content-full-width {
   padding: 20px;
   background: #ffffff;
+  margin-left: 0;
   margin-top: 64px;
-  margin-bottom: 36px;
-  min-height: calc(100vh - 100px);
+  min-height: calc(100vh - 64px);
   overflow-y: auto;
+}
+
+/* 响应式布局 - 当屏幕宽度小于768px时 */
+@media (max-width: 768px) {
+  .content-full-width {
+    padding: 16px;
+  }
 }
 
 .footer {
   padding: 0px;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   text-align: center;
+  background-color: #fff;
+  border-top: 1px solid #f0f0f0;
 }
 </style>

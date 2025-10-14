@@ -50,9 +50,13 @@
                   <UserOutlined />
                   个人中心
                 </a-menu-item>
+                <a-menu-item key="2" @click="toMySpace">
+                  <FolderOutlined />
+                  我的空间
+                </a-menu-item>
                 <a-menu-item
                   v-if="checkAccess(loginUserStore.loginUser, 'admin')"
-                  key="2"
+                  key="3"
                   @click="toUserManage"
                 >
                   <TeamOutlined />
@@ -66,7 +70,15 @@
                   <PictureOutlined />
                   图片管理
                 </a-menu-item>
-                <a-menu-item key="3" @click="handleLogout">
+                <a-menu-item
+                  v-if="checkAccess(loginUserStore.loginUser, 'admin')"
+                  key="5"
+                  @click="toSpaceManage"
+                >
+                  <SettingOutlined />
+                  空间管理
+                </a-menu-item>
+                <a-menu-item key="6" @click="handleLogout">
                   <LogoutOutlined />
                   退出登录
                 </a-menu-item>
@@ -98,13 +110,15 @@
 <script lang="ts" setup>
 import { h, ref, computed } from "vue";
 import {
-  HeartOutlined,
+  HomeOutlined,
   AppstoreOutlined,
   UserOutlined,
   DownOutlined,
   LogoutOutlined,
   TeamOutlined,
   PictureOutlined,
+  FolderOutlined,
+  SettingOutlined,
 } from "@ant-design/icons-vue";
 import type { MenuProps } from "ant-design-vue";
 import router from "@/router";
@@ -120,7 +134,7 @@ loginUserStore.fetchLoginUser();
 const menus = ref<MenuProps["items"]>([
   {
     key: "/",
-    icon: () => h(HeartOutlined),
+    icon: () => h(HomeOutlined),
     label: "欢迎",
     title: "欢迎",
   },
@@ -170,13 +184,23 @@ const toProfile = () => {
   router.push("/user/profile");
 };
 
+// 我的空间
+const toMySpace = () => {
+  router.push("/my_space");
+};
 // 管理中心
 const toUserManage = () => {
   router.push("/admin/userManage");
 };
 
+// 图片管理
 const toPictureManage = () => {
   router.push("/admin/pictureManage");
+};
+
+// 空间管理
+const toSpaceManage = () => {
+  router.push("/admin/spaceManage");
 };
 
 // 退出登录

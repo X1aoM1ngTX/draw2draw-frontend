@@ -134,8 +134,8 @@
         <a-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
           <div class="process-step">
             <div class="step-number">2</div>
-            <h3>创建/加入项目</h3>
-            <p>创建新的绘图项目或加入现有项目</p>
+            <h3>创建/加入空间</h3>
+            <p>创建新的空间或加入现有空间</p>
           </div>
         </a-col>
         <a-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
