@@ -31,6 +31,7 @@
       :loading="loading"
       :showOp="true"
       :onReload="fetchData"
+      :showAuthor="false"
     />
     <!-- 分页 -->
     <a-pagination
