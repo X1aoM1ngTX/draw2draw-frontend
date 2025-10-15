@@ -50,6 +50,19 @@
           <a-descriptions-item label="大小">
             {{ formatSize(picture.picSize) }}
           </a-descriptions-item>
+          <a-descriptions-item label="主色调">
+            <a-space>
+              <div
+                v-if="picture.picColor"
+                :style="{
+                  backgroundColor: toHexColor(picture.picColor),
+                  width: '16px',
+                  height: '16px',
+                }"
+              />
+              {{ picture.picColor ?? "-" }}
+            </a-space>
+          </a-descriptions-item>
         </a-descriptions>
         <a-space wrap>
           <a-button v-if="canEdit" type="default" @click="doEdit">
@@ -64,6 +77,18 @@
               <DeleteOutlined />
             </template>
           </a-button>
+          <a-button type="default" @click="doSearchByImage">
+            以图搜图
+            <template #icon>
+              <SearchOutlined />
+            </template>
+          </a-button>
+          <a-button type="default" @click="doShare">
+            分享
+            <template #icon>
+              <ShareAltOutlined />
+            </template>
+          </a-button>
           <a-button type="primary" @click="doDownload">
             下载
             <template #icon>
@@ -74,6 +99,9 @@
       </a-card>
     </a-col>
   </a-row>
+
+  <!-- 分享弹窗 -->
+  <ShareModal ref="shareModalRef" :link="shareLink" title="分享图片" />
 </template>
 
 <script lang="ts" setup>
@@ -87,16 +115,29 @@ import {
   EditOutlined,
   DeleteOutlined,
   DownloadOutlined,
+  SearchOutlined,
+  ShareAltOutlined,
 } from "@ant-design/icons-vue";
-import { downloadImage, formatSize } from "@/utils";
+import { downloadImage, formatSize, toHexColor } from "@/utils";
 import router from "@/router";
 import { useLoginUserStore } from "@/stores/useLoginUserStore";
+import ShareModal from "@/components/ShareModal.vue";
 
 const props = defineProps<{
   id: string | number;
 }>();
 
 const picture = ref<API.PictureVO>({});
+
+// 分享弹窗引用
+const shareModalRef = ref();
+
+// 分享链接
+const shareLink = computed(() => {
+  const id = picture.value.id;
+  if (!id) return "";
+  return `${window.location.protocol}//${window.location.host}/picture/${id}`;
+});
 
 // 获取图片详情
 const fetchPictureDetail = async () => {
@@ -109,8 +150,9 @@ const fetchPictureDetail = async () => {
     } else {
       message.error("获取图片详情失败，" + res.data.message);
     }
-  } catch (e: any) {
-    message.error("获取图片详情失败：" + e.message);
+  } catch (e: unknown) {
+    const error = e as Error;
+    message.error("获取图片详情失败：" + error.message);
   }
 };
 
@@ -131,13 +173,13 @@ const canEdit = computed(() => {
 // 编辑
 const doEdit = () => {
   router.push({
-    path: '/add_picture',
+    path: "/add_picture",
     query: {
       id: picture.value.id,
-      spaceId: picture.value.spaceId
-    }
-  })
-}
+      spaceId: picture.value.spaceId,
+    },
+  });
+};
 
 // 删除
 const doDelete = async () => {
@@ -162,8 +204,9 @@ const doDelete = async () => {
         } else {
           message.error("删除失败：" + (res.data.message || "未知错误"));
         }
-      } catch (e: any) {
-        message.error("删除失败：" + e.message);
+      } catch (e: unknown) {
+        const error = e as Error;
+        message.error("删除失败：" + error.message);
       }
     },
     onCancel() {
@@ -175,6 +218,22 @@ const doDelete = async () => {
 // 下载
 const doDownload = () => {
   downloadImage(picture.value.url);
+};
+
+// 以图搜图
+const doSearchByImage = () => {
+  if (picture.value.id) {
+    // 在新标签页中打开以图搜图页面，传递图片ID作为参数
+    const url = `${window.location.origin}/search_picture?pictureId=${picture.value.id}`;
+    window.open(url, "_blank");
+  }
+};
+
+// 分享
+const doShare = () => {
+  if (shareModalRef.value) {
+    shareModalRef.value.openModal();
+  }
 };
 
 onMounted(() => {

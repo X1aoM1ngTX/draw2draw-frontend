@@ -9,7 +9,7 @@
       <template #renderItem="{ item: picture }">
         <a-list-item style="padding: 0">
           <!-- 单张图片 -->
-          <a-card hoverable @click="doClickPicture(picture)">
+          <a-card hoverable @click="doClickPicture(picture)" :data-picture-id="picture.id">
             <template #cover>
               <img
                 style="height: 180px; object-fit: cover"
@@ -52,6 +52,7 @@ import { useRouter } from "vue-router";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons-vue";
 import { deletePictureUsingPost } from "@/api/pictureController";
 import { message } from "ant-design-vue";
+import ShareModal from "./ShareModal.vue";
 
 interface Props {
   dataList?: API.PictureVO[];

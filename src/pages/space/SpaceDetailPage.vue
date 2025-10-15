@@ -14,11 +14,16 @@
           />
         </a-tooltip>
       </a-space>
-      <a-button type="primary" @click="showUploadModal = true">
-        + 创建图片
-      </a-button>
+      <a-space>
+        <a-button @click="doBatchEdit"> <EditOutlined />批量编辑 </a-button>
+        <a-button type="primary" @click="showUploadModal = true">
+          <PlusOutlined />创建图片
+        </a-button>
+      </a-space>
     </a-flex>
     <div style="margin-bottom: 16px" />
+    <!-- 搜索表单 -->
+    <PictureSearchForm :onSearch="onSearch" />
     <!-- 图片列表 -->
     <PictureList
       :showOperation="true"
@@ -111,6 +116,14 @@
         </a-form>
       </div>
     </a-modal>
+
+    <!-- 批量编辑图片弹窗 -->
+    <BatchEditPictureModal
+      ref="batchEditPictureModalRef"
+      :pictureList="dataList"
+      :spaceId="id"
+      :onSuccess="onBatchEditPictureSuccess"
+    />
   </div>
 </template>
 
@@ -118,15 +131,19 @@
 import { onMounted, reactive, ref } from "vue";
 import { getSpaceVoByIdUsingGet } from "@/api/spaceController.ts";
 import { message } from "ant-design-vue";
+import { PlusOutlined, EditOutlined } from "@ant-design/icons-vue";
 import {
   listPictureVoByPageUsingPost,
   listPictureTagCategoryUsingGet,
   editPictureUsingPost,
+  searchPictureByColorUsingPost,
 } from "@/api/pictureController.ts";
 import { formatSize } from "@/utils";
 import PictureList from "@/components/PictureList.vue";
 import PictureUpload from "@/components/PictureUpload.vue";
 import UrlPictureUpload from "@/components/UrlPictureUpload.vue";
+import PictureSearchForm from "@/components/PictureSearchForm.vue";
+import BatchEditPictureModal from "@/components/BatchEditPictureModal.vue";
 
 interface Props {
   id: string | number;
@@ -167,7 +184,7 @@ const total = ref(0);
 const loading = ref(true);
 
 // 搜索条件
-const searchParams = reactive<API.PictureQueryRequest>({
+const searchParams = ref<API.PictureQueryRequest & { picColor?: string }>({
   current: 1,
   pageSize: 10,
   sortField: "createTime",
@@ -177,25 +194,101 @@ const searchParams = reactive<API.PictureQueryRequest>({
 // 获取数据
 const fetchData = async () => {
   loading.value = true;
-  // 转换搜索参数
-  const params = {
-    spaceId: props.id,
-    ...searchParams,
-  };
-  const res = await listPictureVoByPageUsingPost(params);
-  if (res.data.code === 0 && res.data.data) {
-    dataList.value = res.data.data.records ?? [];
-    total.value = res.data.data.total ?? 0;
-  } else {
-    message.error("获取数据失败，" + res.data.message);
+
+  try {
+    // 检查是否有颜色搜索参数
+    if (searchParams.value.picColor) {
+      // 使用颜色搜索API
+      const res = await searchPictureByColorUsingPost({
+        picColor: searchParams.value.picColor,
+        spaceId: props.id,
+      });
+
+      if (res.data.code === 0 && res.data.data) {
+        let records = res.data.data ?? [];
+
+        // 如果有尺寸预设，进行前端过滤
+        if ((searchParams.value as Record<string, unknown>).sizePreset) {
+          records = filterPicturesBySizePreset(
+            records,
+            (searchParams.value as Record<string, unknown>).sizePreset as string
+          );
+        }
+
+        dataList.value = records;
+        total.value = records.length;
+      } else {
+        message.error("获取数据失败，" + res.data.message);
+      }
+    } else {
+      // 使用常规分页搜索API
+      const params = {
+        spaceId: props.id,
+        ...searchParams.value,
+      };
+      const res = await listPictureVoByPageUsingPost(params);
+      if (res.data.code === 0 && res.data.data) {
+        let records = res.data.data.records ?? [];
+
+        // 如果有尺寸预设，进行前端过滤
+        if ((searchParams.value as Record<string, unknown>).sizePreset) {
+          records = filterPicturesBySizePreset(
+            records,
+            (searchParams.value as Record<string, unknown>).sizePreset as string
+          );
+        }
+
+        dataList.value = records;
+        total.value = records.length;
+      } else {
+        message.error("获取数据失败，" + res.data.message);
+      }
+    }
+  } catch (error: any) {
+    message.error("获取数据失败：" + error.message);
   }
+
   loading.value = false;
+};
+
+// 根据尺寸预设过滤图片
+const filterPicturesBySizePreset = (
+  pictures: API.PictureVO[],
+  preset: string
+) => {
+  return pictures.filter((picture) => {
+    const width = picture.picWidth || 0;
+    const height = picture.picHeight || 0;
+
+    switch (preset) {
+      case "small":
+        // 小：0-400 (宽或高任一满足即可)
+        return (
+          (width <= 400 && height <= 400) ||
+          (width <= 400 && height > 0) ||
+          (height <= 400 && width > 0)
+        );
+      case "medium":
+        // 中：401-800 (宽或高任一满足即可)
+        return (width > 400 && width <= 800) || (height > 400 && height <= 800);
+      case "large":
+        // 大：801-1200 (宽或高任一满足即可)
+        return (
+          (width > 800 && width <= 1200) || (height > 800 && height <= 1200)
+        );
+      case "xlarge":
+        // 特大：1201以上 (宽或高任一满足即可)
+        return width > 1200 || height > 1200;
+      default:
+        return true;
+    }
+  });
 };
 
 // 分页参数
 const onPageChange = (page: number, pageSize: number) => {
-  searchParams.current = page;
-  searchParams.pageSize = pageSize;
+  searchParams.value.current = page;
+  searchParams.value.pageSize = pageSize;
   fetchData();
 };
 
@@ -266,6 +359,30 @@ const handleModalCancel = () => {
   Object.keys(pictureForm).forEach((key) => {
     delete pictureForm[key];
   });
+};
+
+const onSearch = (newSearchParams: API.PictureQueryRequest) => {
+  searchParams.value = {
+    ...searchParams.value,
+    ...newSearchParams,
+    current: 1,
+  };
+  fetchData();
+};
+
+// 分享弹窗引用
+const batchEditPictureModalRef = ref();
+
+// 批量编辑成功后，刷新数据
+const onBatchEditPictureSuccess = () => {
+  fetchData();
+};
+
+// 打开批量编辑弹窗
+const doBatchEdit = () => {
+  if (batchEditPictureModalRef.value) {
+    batchEditPictureModalRef.value.openModal();
+  }
 };
 
 // 页面加载时获取数据，请求一次
