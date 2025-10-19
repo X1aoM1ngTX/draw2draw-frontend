@@ -19,6 +19,9 @@
         <a-button type="primary" @click="showUploadModal = true">
           <PlusOutlined />创建图片
         </a-button>
+        <a-button type="primary" ghost @click="toSpaceAnalysis">
+          <BarChartOutlined />空间分析
+        </a-button>
       </a-space>
     </a-flex>
     <div style="margin-bottom: 16px" />
@@ -130,9 +133,10 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
 import { getSpaceVoByIdUsingGet } from "@/api/spaceController.ts";
 import { message } from "ant-design-vue";
-import { PlusOutlined, EditOutlined } from "@ant-design/icons-vue";
+import { PlusOutlined, EditOutlined, BarChartOutlined } from "@ant-design/icons-vue";
 import {
   listPictureVoByPageUsingPost,
   listPictureTagCategoryUsingGet,
@@ -151,6 +155,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const router = useRouter();
 const space = ref<API.SpaceVO>({});
 
 // 弹窗相关状态
@@ -384,6 +389,16 @@ const doBatchEdit = () => {
   if (batchEditPictureModalRef.value) {
     batchEditPictureModalRef.value.openModal();
   }
+};
+
+// 跳转到空间分析页面
+const toSpaceAnalysis = () => {
+  router.push({
+    path: "/space_analyze",
+    query: {
+      spaceId: props.id,
+    },
+  });
 };
 
 // 页面加载时获取数据，请求一次

@@ -11,9 +11,19 @@
           @click="fetchData()"
         />
       </a-tooltip>
-      <a-button type="primary" href="/add_space" target="_blank"
-        >+ 创建空间</a-button
+      <a-button type="primary" ghost href="/add_space" target="_blank">
+        <PlusOutlined />创建空间
+      </a-button>
+      <a-button
+        type="primary"
+        href="/space_analyze?queryPublic=1"
+        target="_blank"
       >
+        <AreaChartOutlined />公共空间分析
+      </a-button>
+      <a-button type="primary" href="/space_analyze?queryAll=1" target="_blank">
+        <PieChartOutlined />全部空间分析
+      </a-button>
     </a-space>
   </a-flex>
 
@@ -93,14 +103,20 @@
         <a-space wrap>
           <a-button
             type="link"
+            :href="`/space_analyze?spaceId=${record.id}`"
+            target="_blank"
+            ><SearchOutlined />
+            分析
+          </a-button>
+          <a-button
+            type="link"
             :href="`/add_space?id=${record.id}`"
             target="_blank"
-          >
-            编辑
+          ><EditOutlined />编辑
           </a-button>
-          <a-button type="link" danger @click="doDelete(record.id)"
-            >删除</a-button
-          >
+          <a-button type="link" danger @click="doDelete(record.id)">
+            <DeleteOutlined />删除
+          </a-button>
         </a-space>
       </template>
     </template>
@@ -115,7 +131,15 @@ import {
 } from "@/api/spaceController";
 import { SPACE_LEVEL_MAP, SPACE_LEVEL_OPTIONS } from "@/constants/space";
 import { message, Modal } from "ant-design-vue";
-import { SyncOutlined } from "@ant-design/icons-vue";
+import {
+  SyncOutlined,
+  PlusOutlined,
+  AreaChartOutlined,
+  PieChartOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  SearchOutlined,
+} from "@ant-design/icons-vue";
 import { computed, onMounted, reactive, ref, h } from "vue";
 import dayjs from "dayjs";
 
@@ -158,7 +182,6 @@ const columns = [
   {
     title: "操作",
     key: "action",
-
     align: "center",
     width: 170,
   },

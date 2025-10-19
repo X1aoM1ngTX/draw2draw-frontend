@@ -90,6 +90,11 @@ const router = createRouter({
       name: "以图搜图",
       component: () => import("@/pages/picture/SearchPicturePage.vue"),
     },
+    {
+      path: "/space_analyze",
+      name: "空间分析",
+      component: () => import("@/pages/analyze/SpaceAnalyzePage.vue"),
+    },
   ],
 });
 
