@@ -22,7 +22,12 @@
             <a-slider v-model:value="formData.count" :min="1" :max="30" />
           </a-col>
           <a-col :span="4">
-            <a-input-number v-model:value="formData.count" :min="1" :max="30" style="margin-left: 16px" />
+            <a-input-number
+              v-model:value="formData.count"
+              :min="1"
+              :max="30"
+              style="margin-left: 16px"
+            />
           </a-col>
         </a-row>
       </a-form-item>

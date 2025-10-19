@@ -70,7 +70,6 @@ import { message } from "ant-design-vue";
 import { getPictureVoByIdUsingGet } from "@/api/pictureController";
 import { searchPictureByPictureUsingPost } from "@/api/pictureController";
 
-
 const route = useRoute();
 const router = useRouter();
 

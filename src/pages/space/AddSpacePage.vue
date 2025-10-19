@@ -105,7 +105,7 @@ import { SPACE_LEVEL_OPTIONS } from "@/constants/space";
 import { formatSize } from "@/utils";
 
 const space = ref<API.SpaceVO>();
-const spaceForm = reactive<API.SpaceAddRequest | API.SpaceEditRequest>({
+const spaceForm = reactive<API.SpaceAddRequest & API.SpaceEditRequest>({
   spaceName: "",
   spaceLevel: 0,
 });
@@ -133,7 +133,9 @@ const router = useRouter();
  * 提交表单
  * @param values
  */
-const handleSubmit = async (values: API.SpaceAddRequest | API.SpaceEditRequest) => {
+const handleSubmit = async (
+  values: API.SpaceAddRequest | API.SpaceEditRequest
+) => {
   const spaceId = space.value?.id;
   loading.value = true;
   try {
@@ -154,8 +156,10 @@ const handleSubmit = async (values: API.SpaceAddRequest | API.SpaceEditRequest) 
     if (res.data.code === 0 && res.data.data) {
       message.success(spaceId ? "修改成功" : "创建成功");
       // 跳转到空间详情页
+      // 如果是更新操作，使用原有的 spaceId；如果是创建操作，使用返回的新 ID
+      const targetId = spaceId || res.data.data;
       router.push({
-        path: `/space/${res.data.data}`,
+        path: `/space/${targetId}`,
       });
     } else {
       message.error("操作失败：" + (res.data.message || "未知错误"));
@@ -189,6 +193,7 @@ const getOldSpace = async () => {
         // 填充表单
         spaceForm.spaceName = data.spaceName || "";
         spaceForm.spaceLevel = data.spaceLevel || 0;
+        spaceForm.id = data.id;
       } else {
         // 空间不存在或其他错误，显示错误信息并重定向
         message.error("获取空间信息失败：" + (res.data.message || "未知错误"));

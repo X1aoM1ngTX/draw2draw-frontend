@@ -1,5 +1,8 @@
 <template>
-  <a-layout-sider v-if="loginUserStore.loginUser.id" breakpoint="lg" collapsed-width="0"
+  <a-layout-sider
+    v-if="loginUserStore.loginUser.id"
+    breakpoint="lg"
+    collapsed-width="0"
     ><a-menu
       mode="inline"
       v-model:selectedKeys="current"

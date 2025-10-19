@@ -30,7 +30,10 @@
             @click="goToSpaceDetail(space.id || 0)"
           >
             <template #cover>
-              <div class="space-cover" :style="{ background: getSpaceColor(space.id || 0) }">
+              <div
+                class="space-cover"
+                :style="{ background: getSpaceColor(space.id || 0) }"
+              >
                 <PictureOutlined />
               </div>
             </template>
@@ -51,7 +54,9 @@
               </div>
               <div class="stat-item">
                 <span class="stat-label">创建时间:</span>
-                <span class="stat-value">{{ formatDate(space.createTime || '') }}</span>
+                <span class="stat-value">{{
+                  formatDate(space.createTime || "")
+                }}</span>
               </div>
             </div>
           </a-card>
@@ -62,13 +67,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { message } from 'ant-design-vue';
-import { PlusOutlined, PictureOutlined } from '@ant-design/icons-vue';
-import { listSpaceVoByPageUsingPost } from '@/api/spaceController';
-import { SPACE_LEVEL_MAP } from '@/constants/space';
-import { useLoginUserStore } from '@/stores/useLoginUserStore';
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { message } from "ant-design-vue";
+import { PlusOutlined, PictureOutlined } from "@ant-design/icons-vue";
+import { listSpaceVoByPageUsingPost } from "@/api/spaceController";
+import { SPACE_LEVEL_MAP } from "@/constants/space";
+import { useLoginUserStore } from "@/stores/useLoginUserStore";
 
 const router = useRouter();
 const loginUserStore = useLoginUserStore();
@@ -79,16 +84,16 @@ const spaceList = ref<API.SpaceVO[]>([]);
 // 生成基于空间ID的固定背景颜色
 const getSpaceColor = (spaceId: number): string => {
   const colors = [
-    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-    'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-    'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-    'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-    'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
-    'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-    'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
-    'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
-    'linear-gradient(135deg, #ff6e7f 0%, #bfe9ff 100%)'
+    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+    "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+    "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
+    "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
+    "linear-gradient(135deg, #30cfd0 0%, #330867 100%)",
+    "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
+    "linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)",
+    "linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)",
+    "linear-gradient(135deg, #ff6e7f 0%, #bfe9ff 100%)",
   ];
   // 使用空间ID来生成固定的索引，确保每个空间有固定的颜色
   const index = spaceId % colors.length;
@@ -97,18 +102,18 @@ const getSpaceColor = (spaceId: number): string => {
 
 // 获取空间级别文本
 const getSpaceLevelText = (level: number): string => {
-  return SPACE_LEVEL_MAP[level] || '未知级别';
+  return SPACE_LEVEL_MAP[level] || "未知级别";
 };
 
 // 格式化日期
 const formatDate = (dateTime: string): string => {
-  if (!dateTime) return '未知';
+  if (!dateTime) return "未知";
   return new Date(dateTime).toLocaleDateString();
 };
 
 // 跳转到创建空间页面
 const goToAddSpace = () => {
-  router.push('/add_space');
+  router.push("/add_space");
 };
 
 // 跳转到空间详情页面
@@ -120,9 +125,12 @@ const goToSpaceDetail = (spaceId: number) => {
 const fetchUserSpaces = async () => {
   try {
     // 检查用户是否登录
-    if (!loginUserStore.loginUser || loginUserStore.loginUser.userRole === 'notLogin') {
-      message.warning('请先登录');
-      router.push('/user/login');
+    if (
+      !loginUserStore.loginUser ||
+      loginUserStore.loginUser.userRole === "notLogin"
+    ) {
+      message.warning("请先登录");
+      router.push("/user/login");
       return;
     }
 
@@ -136,11 +144,11 @@ const fetchUserSpaces = async () => {
     if (res.data.code === 0 && res.data.data?.records) {
       spaceList.value = res.data.data.records;
     } else {
-      message.error('获取空间列表失败: ' + res.data.message);
+      message.error("获取空间列表失败: " + res.data.message);
     }
   } catch (error) {
-    console.error('获取空间列表出错:', error);
-    message.error('获取空间列表失败，请稍后重试');
+    console.error("获取空间列表出错:", error);
+    message.error("获取空间列表失败，请稍后重试");
   }
 };
 

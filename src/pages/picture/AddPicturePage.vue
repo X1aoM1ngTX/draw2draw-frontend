@@ -30,7 +30,9 @@
     <div v-if="picture" class="edit-bar">
       <a-space>
         <a-button @click="doEditPicture"><EditOutlined />编辑图片</a-button>
-        <a-button @click="doImagePainting"><FullscreenOutlined />AI扩图</a-button>
+        <a-button @click="doImagePainting"
+          ><FullscreenOutlined />AI扩图</a-button
+        >
       </a-space>
       <ImageCropper
         ref="imageCropperRef"

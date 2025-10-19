@@ -4,8 +4,13 @@
       <div class="footer-text">
         <span class="copyright">© 2025 Draw2Draw. All rights reserved.</span>
         <span class="divider">|</span>
-        <span>Powered by
-          <a href="https://www.antdv.com/components/overview-cn" target="_blank" rel="noopener noreferrer">
+        <span
+          >Powered by
+          <a
+            href="https://www.antdv.com/components/overview-cn"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Ant Design Vue
           </a>
         </span>

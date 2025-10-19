@@ -55,7 +55,7 @@ const router = useRouter();
 const showContextMenu = ref(false);
 const contextMenuX = ref(0);
 const contextMenuY = ref(0);
-const menuType = ref<'default' | 'image'>('default');
+const menuType = ref<"default" | "image">("default");
 const selectedImageId = ref<string | null>(null);
 
 // 处理右键点击事件
@@ -68,8 +68,8 @@ const handleContextMenu = (e: MouseEvent) => {
   contextMenuY.value = e.clientY;
 
   // 检查是否是图片元素
-  if (target.tagName === 'IMG') {
-    menuType.value = 'image';
+  if (target.tagName === "IMG") {
+    menuType.value = "image";
     // 尝试从图片元素或其父元素获取图片ID
     const imgElement = target as HTMLImageElement;
     // 从图片URL中提取ID，或者从data属性中获取
@@ -79,15 +79,15 @@ const handleContextMenu = (e: MouseEvent) => {
       selectedImageId.value = idMatch[1];
     } else {
       // 尝试从父元素的data属性获取
-      const parentCard = target.closest('.ant-card');
+      const parentCard = target.closest(".ant-card");
       if (parentCard) {
         const cardElement = parentCard as HTMLElement;
-        const pictureId = cardElement.getAttribute('data-picture-id');
+        const pictureId = cardElement.getAttribute("data-picture-id");
         selectedImageId.value = pictureId;
       }
     }
   } else {
-    menuType.value = 'default';
+    menuType.value = "default";
     selectedImageId.value = null;
   }
 
@@ -122,7 +122,7 @@ const handleSearchByImage = () => {
   if (selectedImageId.value) {
     // 在新标签页中打开以图搜图页面，传递图片ID作为参数
     const url = `${window.location.origin}/search_picture?pictureId=${selectedImageId.value}`;
-    window.open(url, '_blank');
+    window.open(url, "_blank");
   }
   showContextMenu.value = false;
 };

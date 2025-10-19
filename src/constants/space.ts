@@ -7,9 +7,9 @@ export const SPACE_LEVEL_ENUM = {
 
 // 空间级别文本映射
 export const SPACE_LEVEL_MAP: Record<number, string> = {
-  0: '免费版',
-  1: '专业版',
-  2: '旗舰版',
+  0: "免费版",
+  1: "专业版",
+  2: "旗舰版",
 };
 
 // // 空间级别最大数量映射
