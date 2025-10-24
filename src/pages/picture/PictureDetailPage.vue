@@ -71,7 +71,7 @@
               <EditOutlined />
             </template>
           </a-button>
-          <a-button v-if="canEdit" danger @click="doDelete">
+          <a-button v-if="canDelete" danger @click="doDelete">
             删除
             <template #icon>
               <DeleteOutlined />
@@ -121,6 +121,7 @@ import {
 import { downloadImage, formatSize, toHexColor } from "@/utils";
 import router from "@/router";
 import { useLoginUserStore } from "@/stores/useLoginUserStore";
+import { SPACE_PERMISSION_ENUM } from "@/constants/space";
 import ShareModal from "@/components/ShareModal.vue";
 
 const props = defineProps<{
@@ -165,9 +166,31 @@ const canEdit = computed(() => {
   if (!loginUser.id) {
     return false;
   }
-  // 仅本人或管理员可编辑
+
+  // 检查图片权限列表
+  const permissionList = picture.value.permissionList || [];
+  const hasEditPermission = permissionList.includes(SPACE_PERMISSION_ENUM.PICTURE_EDIT);
+
+  // 仅本人或管理员或有编辑权限的用户可编辑
   const user = picture.value.user || {};
-  return loginUser.id === user.id || loginUser.userRole === "admin";
+  return loginUser.id === user.id || loginUser.userRole === "admin" || hasEditPermission;
+});
+
+// 是否具有删除权限
+const canDelete = computed(() => {
+  const loginUser = loginUserStore.loginUser;
+  // 未登录不可删除
+  if (!loginUser.id) {
+    return false;
+  }
+
+  // 检查图片权限列表
+  const permissionList = picture.value.permissionList || [];
+  const hasDeletePermission = permissionList.includes(SPACE_PERMISSION_ENUM.PICTURE_DELETE);
+
+  // 仅本人或管理员或有删除权限的用户可删除
+  const user = picture.value.user || {};
+  return loginUser.id === user.id || loginUser.userRole === "admin" || hasDeletePermission;
 });
 
 // 编辑

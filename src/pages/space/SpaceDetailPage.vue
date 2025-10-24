@@ -3,7 +3,7 @@
     <!-- 空间信息 -->
     <a-flex justify="space-between">
       <a-space size="middle">
-        <h2>{{ space.spaceName }}（私有空间）</h2>
+        <h2>{{ space.spaceName }}（{{ SPACE_TYPE_MAP[space.spaceType] }}）</h2>
         <a-tooltip
           :title="`占用空间 ${formatSize(space.totalSize)} / ${formatSize(space.maxSize)}`"
         >
@@ -15,11 +15,31 @@
         </a-tooltip>
       </a-space>
       <a-space>
-        <a-button @click="doBatchEdit"> <EditOutlined />批量编辑 </a-button>
-        <a-button type="primary" @click="showUploadModal = true">
+        <a-button v-if="canEditPicture" @click="doBatchEdit">
+          <EditOutlined />批量编辑
+        </a-button>
+        <a-button
+          v-if="canUploadPicture"
+          type="primary"
+          ghost
+          @click="showUploadModal = true"
+        >
           <PlusOutlined />创建图片
         </a-button>
-        <a-button type="primary" ghost @click="toSpaceAnalysis">
+        <a-button
+          v-if="canManageSpaceUser && SPACE_TYPE_ENUM.TEAM === Number(space.spaceType)"
+          type="primary"
+          ghost
+          :href="`/space/${id}/memberManage`"
+        >
+          <TeamOutlined />
+          成员管理
+        </a-button>
+        <a-button
+          v-if="canManageSpaceUser"
+          type="primary"
+          @click="toSpaceAnalysis"
+        >
           <BarChartOutlined />空间分析
         </a-button>
       </a-space>
@@ -35,6 +55,8 @@
       :showOp="true"
       :onReload="fetchData"
       :showAuthor="false"
+      :canEdit="canEditPicture"
+      :canDelete="canDeletePicture"
     />
     <!-- 分页 -->
     <a-pagination
@@ -132,11 +154,16 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { getSpaceVoByIdUsingGet } from "@/api/spaceController.ts";
 import { message } from "ant-design-vue";
-import { PlusOutlined, EditOutlined, BarChartOutlined } from "@ant-design/icons-vue";
+import {
+  PlusOutlined,
+  EditOutlined,
+  BarChartOutlined,
+  TeamOutlined,
+} from "@ant-design/icons-vue";
 import {
   listPictureVoByPageUsingPost,
   listPictureTagCategoryUsingGet,
@@ -144,6 +171,11 @@ import {
   searchPictureByColorUsingPost,
 } from "@/api/pictureController.ts";
 import { formatSize } from "@/utils";
+import {
+  SPACE_TYPE_MAP,
+  SPACE_TYPE_ENUM,
+  SPACE_PERMISSION_ENUM,
+} from "@/constants/space";
 import PictureList from "@/components/PictureList.vue";
 import PictureUpload from "@/components/PictureUpload.vue";
 import UrlPictureUpload from "@/components/UrlPictureUpload.vue";
@@ -158,6 +190,27 @@ const props = defineProps<Props>();
 const router = useRouter();
 const space = ref<API.SpaceVO>({});
 
+// 通用权限检查函数
+function createPermissionChecker(permission: string) {
+  return computed(() => {
+    return (space.value.permissionList ?? []).includes(permission);
+  });
+}
+
+// 定义权限检查
+const canManageSpaceUser = createPermissionChecker(
+  SPACE_PERMISSION_ENUM.SPACE_USER_MANAGE
+);
+const canUploadPicture = createPermissionChecker(
+  SPACE_PERMISSION_ENUM.PICTURE_UPLOAD
+);
+const canEditPicture = createPermissionChecker(
+  SPACE_PERMISSION_ENUM.PICTURE_EDIT
+);
+const canDeletePicture = createPermissionChecker(
+  SPACE_PERMISSION_ENUM.PICTURE_DELETE
+);
+
 // 弹窗相关状态
 const showUploadModal = ref(false);
 const uploadType = ref<"file" | "url">("file");
@@ -169,6 +222,13 @@ const tagOptions = ref<string[]>([]);
 // -------- 获取空间详情 --------
 const fetchSpaceDetail = async () => {
   try {
+    // 验证 id 参数
+    if (!props.id || isNaN(Number(props.id)) || Number(props.id) <= 0) {
+      message.error("无效的空间ID");
+      router.push("/my_space");
+      return;
+    }
+
     const res = await getSpaceVoByIdUsingGet({
       id: props.id,
     });

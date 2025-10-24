@@ -21,7 +21,7 @@
               </a-button>
               <a-button
                 size="large"
-                @click="router.push('/about')"
+                @click="scrollToCoreFeatures"
                 style="margin-left: 16px"
               >
                 了解更多
@@ -38,7 +38,7 @@
     </div>
 
     <!-- 功能特色区域 -->
-    <div class="features-section">
+    <div id="core-features" class="features-section">
       <h2 class="section-title">核心功能</h2>
       <a-row :gutter="[24, 24]" justify="center">
         <a-col :xs="24" :sm="12" :md="8" :lg="8" :xl="6">
@@ -193,6 +193,16 @@ const loginUser = computed(() => loginUserStore.loginUser);
 
 const goToDrawing = () => {
   router.push("/add_picture");
+};
+
+const scrollToCoreFeatures = () => {
+  const element = document.getElementById('core-features');
+  if (element) {
+    element.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
 };
 </script>
 

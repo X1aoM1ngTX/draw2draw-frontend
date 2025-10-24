@@ -46,6 +46,15 @@
           allow-clear
         />
       </a-form-item>
+      <a-form-item label="空间类别" name="spaceType">
+        <a-select
+          v-model:value="searchParams.spaceType"
+          :options="SPACE_TYPE_OPTIONS"
+          placeholder="请选择空间类别"
+          style="min-width: 180px"
+          allow-clear
+        />
+      </a-form-item>
       <a-form-item label="用户 id" name="userId">
         <a-input
           v-model:value="searchParams.userId"
@@ -85,6 +94,14 @@
       <template v-if="column.dataIndex === 'spaceLevel'">
         <a-tag>{{ SPACE_LEVEL_MAP[record.spaceLevel] }}</a-tag>
       </template>
+
+      <!-- 空间类别 -->
+      <template v-else-if="column.dataIndex === 'spaceType'">
+        <a-tag :color="record.spaceType === 1 ? 'blue' : 'green'">
+          {{ SPACE_TYPE_MAP[record.spaceType] || "-" }}
+        </a-tag>
+      </template>
+
       <!-- 使用情况 -->
       <template v-if="column.dataIndex === 'spaceUseInfo'">
         <div>
@@ -112,7 +129,7 @@
             type="link"
             :href="`/add_space?id=${record.id}`"
             target="_blank"
-          ><EditOutlined />编辑
+            ><EditOutlined />编辑
           </a-button>
           <a-button type="link" danger @click="doDelete(record.id)">
             <DeleteOutlined />删除
@@ -129,7 +146,7 @@ import {
   deleteSpaceUsingPost,
   listSpaceByPageUsingPost,
 } from "@/api/spaceController";
-import { SPACE_LEVEL_MAP, SPACE_LEVEL_OPTIONS } from "@/constants/space";
+import { SPACE_LEVEL_MAP, SPACE_LEVEL_OPTIONS, SPACE_TYPE_MAP, SPACE_TYPE_OPTIONS } from "@/constants/space";
 import { message, Modal } from "ant-design-vue";
 import {
   SyncOutlined,
@@ -158,6 +175,10 @@ const columns = [
     title: "空间级别",
     dataIndex: "spaceLevel",
     width: 120,
+  },
+  {
+    title: "空间类别",
+    dataIndex: "spaceType",
   },
   {
     title: "使用情况",

@@ -86,6 +86,12 @@ const router = createRouter({
       props: true,
     },
     {
+      path: "/space/:id/memberManage",
+      name: "空间成员管理",
+      component: () => import("@/pages/space/SpaceMemberManage.vue"),
+      props: true,
+    },
+    {
       path: "/search_picture",
       name: "以图搜图",
       component: () => import("@/pages/picture/SearchPicturePage.vue"),

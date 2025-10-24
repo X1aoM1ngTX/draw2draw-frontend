@@ -408,6 +408,7 @@ const onColorChange = async (color: string) => {
 
 /* 输入框样式 */
 .search-input {
+  min-width: 200px;
   border-radius: 6px;
   transition: all 0.3s ease;
 }

@@ -25,40 +25,44 @@
             <a-card-meta :title="picture.name">
               <template #description>
                 <a-flex>
-                  <a-tag color="green">
-                    {{ picture.category ?? "默认" }}
-                  </a-tag>
-                  <a-tag v-for="tag in picture.tags" :key="tag">
-                    {{ tag }}
-                  </a-tag>
+                  <a-apace>
+                    <a-tag color="green">
+                      {{ picture.category ?? "默认" }}
+                    </a-tag>
+                    <a-tag v-for="tag in picture.tags" :key="tag">
+                      {{ tag }}
+                    </a-tag>
+                  </a-apace>
                 </a-flex>
+              </template>
+              <template #avatar>
+                <a-avatar :src="picture.user.userAvatar">
+                  {{
+                    (
+                      picture.user.userName ||
+                      picture.user.userAccount ||
+                      "U"
+                    )?.charAt(0)
+                  }}
+                </a-avatar>
               </template>
             </a-card-meta>
             <template #actions v-if="showOperation">
-              <a-space @click="(e: Event) => doEdit(picture, e)">
+              <a-space
+                v-if="canEdit"
+                @click="(e: Event) => doEdit(picture, e)"
+              >
                 <EditOutlined />
                 编辑
               </a-space>
-              <a-space @click="(e: Event) => doDelete(picture, e)">
+              <a-space
+                v-if="canDelete"
+                @click="(e: Event) => doDelete(picture, e)"
+              >
                 <DeleteOutlined />
                 删除
               </a-space>
             </template>
-            <!-- 作者信息放在右下角 -->
-            <div class="author-info-bottom" v-if="picture.user">
-              <span class="author-name">{{
-                picture.user.userName || picture.user.userAccount
-              }}</span>
-              <a-avatar :src="picture.user.userAvatar" :size="24">
-                {{
-                  (
-                    picture.user.userName ||
-                    picture.user.userAccount ||
-                    "U"
-                  )?.charAt(0)
-                }}
-              </a-avatar>
-            </div>
           </a-card>
         </a-list-item>
       </template>
@@ -78,6 +82,8 @@ interface Props {
   showOperation?: boolean;
   onReload?: () => void;
   showAuthor?: boolean; // 是否显示作者信息
+  canEdit?: boolean; // 是否可以编辑
+  canDelete?: boolean; // 是否可以删除
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -85,6 +91,8 @@ const props = withDefaults(defineProps<Props>(), {
   loading: false,
   showOperation: false,
   showAuthor: true, // 默认显示作者信息
+  canEdit: false,
+  canDelete: false,
 });
 
 // 跳转至图片详情
@@ -129,15 +137,12 @@ const doDelete = async (picture: API.PictureVO, e: Event) => {
 
 <style scoped>
 .author-info-bottom {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
   display: flex;
   align-items: center;
   background-color: rgba(255, 255, 255, 0.8);
   padding: 4px 8px;
   border-radius: 16px;
-  z-index: 1;
+  margin-left: auto;
 }
 
 .author-name {
@@ -148,10 +153,5 @@ const doDelete = async (picture: API.PictureVO, e: Event) => {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100px;
-}
-
-/* 确保卡片有相对定位，以便绝对定位的作者信息可以正确定位 */
-.ant-card {
-  position: relative !important;
 }
 </style>
