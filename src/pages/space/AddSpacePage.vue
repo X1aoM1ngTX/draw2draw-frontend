@@ -42,7 +42,7 @@
     <a-card title="空间级别介绍">
       <a-typography-paragraph>
         * 目前仅支持开通普通版，如需升级空间，请联系
-        <a href="https://codefather.cn" target="_blank">程序员鱼皮</a>
+        <a href="https://github.com/X1aoM1ngTX" target="_blank">管理员</a>
       </a-typography-paragraph>
       <a-row :gutter="16">
         <a-col

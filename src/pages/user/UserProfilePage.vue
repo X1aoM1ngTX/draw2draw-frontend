@@ -1,61 +1,116 @@
 <template>
   <div class="user-profile-page">
-    <!-- 用户信息卡片 -->
-    <a-card class="user-info-card" :bordered="false">
-      <a-row :gutter="[16, 16]" align="middle">
-        <a-col :xs="24" :sm="8" :md="6" :lg="4">
-          <div class="avatar-container">
-            <a-upload
-              v-if="isOwnProfile"
-              name="avatar"
-              list-type="picture-card"
-              class="avatar-uploader"
-              :show-upload-list="false"
-              :before-upload="beforeUpload"
-              :customRequest="handleAvatarUpload"
-            >
-              <img
-                v-if="loginUser.userAvatar"
-                :src="loginUser.userAvatar"
-                alt="avatar"
-              />
-              <div v-else>
-                <loading-outlined v-if="avatarLoading"></loading-outlined>
-                <user-outlined v-else></user-outlined>
-                <div class="ant-upload-text">上传头像</div>
+    <!-- 用户信息区域 -->
+    <a-row :gutter="[16, 16]">
+      <!-- 左侧用户信息卡片 (2/3) -->
+      <a-col :xs="24" :lg="16">
+        <a-card class="user-info-card" :bordered="false">
+          <a-row :gutter="[16, 16]" align="middle">
+            <a-col :xs="24" :sm="8" :md="6" :lg="8">
+              <div class="avatar-container">
+                <a-upload
+                  v-if="isOwnProfile"
+                  name="avatar"
+                  list-type="picture-card"
+                  class="avatar-uploader"
+                  :show-upload-list="false"
+                  :before-upload="beforeUpload"
+                  :customRequest="handleAvatarUpload"
+                >
+                  <img
+                    v-if="loginUser.userAvatar"
+                    :src="loginUser.userAvatar"
+                    alt="avatar"
+                  />
+                  <div v-else>
+                    <loading-outlined v-if="avatarLoading"></loading-outlined>
+                    <user-outlined v-else></user-outlined>
+                    <div class="ant-upload-text">上传头像</div>
+                  </div>
+                </a-upload>
+                <a-avatar
+                  v-else
+                  :size="120"
+                  :src="loginUser.userAvatar"
+                  class="user-avatar"
+                >
+                  <template #icon>
+                    <UserOutlined />
+                  </template>
+                </a-avatar>
               </div>
-            </a-upload>
-            <a-avatar
-              v-else
-              :size="120"
-              :src="loginUser.userAvatar"
-              class="user-avatar"
+            </a-col>
+            <a-col :xs="24" :sm="16" :md="18" :lg="16">
+              <div class="user-details">
+                <h1 class="username">{{ loginUser.userName || "未设置用户名" }}</h1>
+                <p class="user-account">账号：{{ loginUser.userAccount }}</p>
+                <p class="user-profile">
+                  {{ loginUser.userProfile || "这个人很懒，什么都没留下~" }}
+                </p>
+                <div class="user-stats">
+                  <a-statistic title="上传图片" :value="userStats.pictureCount" />
+                  <a-divider type="vertical" />
+                  <a-statistic
+                    title="创建时间"
+                    :value="formatDate(loginUser.createTime)"
+                  />
+                </div>
+              </div>
+            </a-col>
+          </a-row>
+        </a-card>
+      </a-col>
+
+      <!-- 右侧VIP信息卡片 (1/3) -->
+      <a-col :xs="24" :lg="8" v-if="isOwnProfile">
+        <a-card class="user-vip-info-card" :bordered="false">
+          <div class="vip-content">
+            <h3 class="vip-title">
+              <CrownOutlined /> VIP会员服务
+            </h3>
+
+            <div class="vip-status">
+              <div v-if="loginUser.isVip === 1" class="vip-info">
+                <a-tag color="gold" class="vip-badge">
+                  <CrownOutlined /> VIP会员
+                </a-tag>
+                <div class="vip-details">
+                  <div class="vip-number">
+                    你好{{ loginUser.vipCode || `VIP${loginUser.id && loginUser.id.toString().slice(-5).padStart(5, '0')}` }}
+                  </div>
+                  <div class="vip-expire" v-if="loginUser.vipExpireTime">
+                    到期时间：{{ formatDate(loginUser.vipExpireTime) }}
+                  </div>
+                </div>
+              </div>
+              <span v-else class="no-vip-tip"> 兑换VIP享受更多特权 </span>
+            </div>
+
+            <a-button
+              type="primary"
+              size="large"
+              @click="goToVipExchange"
+              class="vip-exchange-btn"
+              :icon="h(CrownOutlined)"
+              block
             >
-              <template #icon>
-                <UserOutlined />
-              </template>
-            </a-avatar>
-          </div>
-        </a-col>
-        <a-col :xs="24" :sm="16" :md="18" :lg="20">
-          <div class="user-details">
-            <h1 class="username">{{ loginUser.userName || "未设置用户名" }}</h1>
-            <p class="user-account">账号：{{ loginUser.userAccount }}</p>
-            <p class="user-profile">
-              {{ loginUser.userProfile || "这个人很懒，什么都没留下~" }}
-            </p>
-            <div class="user-stats">
-              <a-statistic title="上传图片" :value="userStats.pictureCount" />
-              <a-divider type="vertical" />
-              <a-statistic
-                title="创建时间"
-                :value="formatDate(loginUser.createTime)"
-              />
+              {{ loginUser.isVip === 1 ? '续费VIP' : 'VIP兑换' }}
+            </a-button>
+
+            <div class="vip-features">
+              <h4>VIP特权</h4>
+              <ul>
+                <li>无限制图片上传</li>
+                <li>高清图片下载</li>
+                <li>专属客服支持</li>
+                <li>优先功能体验</li>
+              </ul>
             </div>
           </div>
-        </a-col>
-      </a-row>
-    </a-card>
+        </a-card>
+      </a-col>
+    </a-row>
+
 
     <!-- 标签页 -->
     <a-tabs v-model:activeKey="activeTab" class="content-tabs">
@@ -140,19 +195,24 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, reactive, ref } from "vue";
-import { useRoute } from "vue-router";
+import { computed, onMounted, reactive, ref, h } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { message } from "ant-design-vue";
-import { UserOutlined, LoadingOutlined } from "@ant-design/icons-vue";
+import {
+  UserOutlined,
+  LoadingOutlined,
+  CrownOutlined,
+} from "@ant-design/icons-vue";
 import { listPictureVoByPageUsingPost } from "@/api/pictureController";
 import {
-  updateUserUsingPost,
+  updateMyInfoUsingPost,
   getUserVoByIdUsingGet,
   uploadUserAvatarUsingPost,
 } from "@/api/userController";
 import { useLoginUserStore } from "@/stores/useLoginUserStore";
 
 const route = useRoute();
+const router = useRouter();
 const loginUserStore = useLoginUserStore();
 
 // 当前登录用户
@@ -174,11 +234,9 @@ const userStats = ref({
 });
 
 // 编辑表单
-const editForm = reactive<API.UserUpdateRequest>({
-  id: loginUser.value.id,
+const editForm = reactive<API.UserMyInfoUpdateRequest>({
   userName: loginUser.value.userName,
   userProfile: loginUser.value.userProfile,
-  userAvatar: loginUser.value.userAvatar,
 });
 
 // 头像上传相关
@@ -215,8 +273,6 @@ const handleAvatarUpload = async ({ file }: { file: File }) => {
           ...loginUser.value,
           userAvatar: avatarUrl,
         });
-        // 更新表单中的头像URL
-        editForm.userAvatar = avatarUrl;
         message.success("头像上传成功");
       }
     } else {
@@ -234,11 +290,9 @@ const handleAvatarUpload = async ({ file }: { file: File }) => {
 const handleUpdateUser = async () => {
   updateLoading.value = true;
   try {
-    const res = await updateUserUsingPost({
-      id: loginUser.value.id,
+    const res = await updateMyInfoUsingPost({
       userName: editForm.userName,
       userProfile: editForm.userProfile,
-      userAvatar: editForm.userAvatar,
     });
     if (res.data.code === 0) {
       message.success("个人信息更新成功");
@@ -247,7 +301,6 @@ const handleUpdateUser = async () => {
         ...loginUser.value,
         userName: editForm.userName,
         userProfile: editForm.userProfile,
-        userAvatar: editForm.userAvatar,
       });
     } else {
       message.error("更新失败：" + (res.data.message || "未知错误"));
@@ -257,6 +310,11 @@ const handleUpdateUser = async () => {
   } finally {
     updateLoading.value = false;
   }
+};
+
+// VIP兑换页面跳转
+const goToVipExchange = () => {
+  router.push("/user/vip/exchange");
 };
 
 // 格式化日期
@@ -453,6 +511,158 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
+.vip-actions {
+  text-align: center;
+  padding: 16px;
+}
+
+.vip-exchange-btn {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  border: none;
+  color: #333;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+}
+
+.vip-exchange-btn:hover {
+  background: linear-gradient(135deg, #ffed4e 0%, #ffd700 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+  color: #333;
+}
+
+.vip-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.vip-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.vip-badge {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.vip-details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.vip-number {
+  font-size: 16px;
+  font-weight: bold;
+  color: #d4af37;
+  background: linear-gradient(135deg, #fff8dc 0%, #ffd700 100%);
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid #d4af37;
+  box-shadow: 0 2px 4px rgba(212, 175, 55, 0.3);
+  width: 100%;
+  text-align: center;
+}
+
+.vip-expire {
+  font-size: 12px;
+  color: #666;
+  background: #f5f5f5;
+  padding: 4px 8px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+}
+
+.no-vip-tip {
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+}
+
+/* VIP信息卡片样式 */
+.user-vip-info-card {
+  background: linear-gradient(135deg, #fff8dc 0%, #fff 100%);
+  border: 1px solid #d4af37;
+  height: 100%;
+}
+
+.vip-content {
+  text-align: center;
+  padding: 8px;
+}
+
+.vip-title {
+  color: #d4af37;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.vip-exchange-btn {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  border: none;
+  color: #333;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+  margin: 16px 0;
+  transition: all 0.3s ease;
+}
+
+.vip-exchange-btn:hover {
+  background: linear-gradient(135deg, #ffed4e 0%, #ffd700 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+  color: #333;
+}
+
+.vip-features {
+  margin-top: 20px;
+  text-align: left;
+}
+
+.vip-features h4 {
+  color: #d4af37;
+  font-size: 14px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.vip-features ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.vip-features li {
+  padding: 4px 0;
+  font-size: 12px;
+  color: #666;
+  position: relative;
+  padding-left: 16px;
+}
+
+.vip-features li:before {
+  content: "✓";
+  color: #d4af37;
+  position: absolute;
+  left: 0;
+  font-weight: bold;
+}
+
 @media (max-width: 768px) {
   .user-details {
     text-align: center;
@@ -461,6 +671,14 @@ onMounted(() => {
 
   .user-stats {
     justify-content: center;
+  }
+
+  .vip-content {
+    padding: 16px;
+  }
+
+  .vip-title {
+    font-size: 16px;
   }
 }
 </style>

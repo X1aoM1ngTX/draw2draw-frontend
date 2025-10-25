@@ -31,6 +31,21 @@ export async function deleteUserUsingPost(
   });
 }
 
+/** exchangeVip POST /api/user/exchange/vip */
+export async function exchangeVipUsingPost(
+  body: API.VipExchangeRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseBoolean_>("/api/user/exchange/vip", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
 /** getUserById POST /api/user/get */
 export async function getUserByIdUsingPost(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
@@ -128,6 +143,21 @@ export async function updateUserUsingPost(
   options?: { [key: string]: any }
 ) {
   return request<API.BaseResponseBoolean_>("/api/user/update", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** updateMyInfo POST /api/user/update/my */
+export async function updateMyInfoUsingPost(
+  body: API.UserMyInfoUpdateRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseBoolean_>("/api/user/update/my", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

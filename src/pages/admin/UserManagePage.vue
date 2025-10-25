@@ -88,10 +88,52 @@
       </template>
 
       <template v-else-if="column.key === 'action'">
-        <a-button danger @click="doDelete(record.id)">删除</a-button>
+        <a-space>
+          <a-button type="primary" ghost @click="doEdit(record)">编辑</a-button>
+          <a-button danger @click="doDelete(record.id)">删除</a-button>
+        </a-space>
       </template>
     </template>
   </a-table>
+
+  <!-- 编辑用户弹窗 -->
+  <a-modal
+    v-model:open="editModalVisible"
+    title="编辑用户"
+    @ok="handleEditOk"
+    @cancel="handleEditCancel"
+    :confirm-loading="editLoading"
+  >
+    <a-form
+      :model="editForm"
+      :rules="editFormRules"
+      ref="editFormRef"
+      layout="vertical"
+    >
+      <a-form-item label="用户账号">
+        <a-input :value="dataList.find(user => user.id === editForm.id)?.userAccount" readonly disabled />
+      </a-form-item>
+      <a-form-item label="用户名" name="userName">
+        <a-input v-model:value="editForm.userName" placeholder="请输入用户名" />
+      </a-form-item>
+      <a-form-item label="用户简介" name="userProfile">
+        <a-textarea
+          v-model:value="editForm.userProfile"
+          placeholder="请输入用户简介"
+          :rows="3"
+          :maxlength="200"
+          show-count
+        />
+      </a-form-item>
+      <a-form-item label="用户角色" name="userRole">
+        <a-select v-model:value="editForm.userRole" placeholder="请选择用户角色">
+          <a-select-option value="user">普通用户</a-select-option>
+          <a-select-option value="admin">管理员</a-select-option>
+        </a-select>
+      </a-form-item>
+    </a-form>
+  </a-modal>
+
   <a-back-top />
 </template>
 
@@ -99,6 +141,8 @@
 import {
   listUserVoByPageUsingPost,
   deleteUserUsingPost,
+  updateUserUsingPost,
+  getUserVoByIdUsingGet,
 } from "@/api/userController";
 import { UserOutlined } from "@ant-design/icons-vue";
 import { message, Modal } from "ant-design-vue";
@@ -142,6 +186,7 @@ const columns = [
   {
     title: "操作",
     key: "action",
+    width: 160,
   },
 ];
 
@@ -156,6 +201,32 @@ const searchParams = reactive<API.UserQueryRequest>({
   sortField: "createTime",
   sortOrder: "ascend",
 });
+
+// 编辑相关
+const editModalVisible = ref(false);
+const editLoading = ref(false);
+const editFormRef = ref();
+const editForm = reactive<API.UserUpdateRequest>({
+  id: 0,
+  userName: "",
+  userProfile: "",
+  userRole: "",
+  userAvatar: "",
+});
+
+// 表单验证规则
+const editFormRules = {
+  userName: [
+    { required: true, message: "请输入用户名", trigger: "blur" },
+    { min: 2, max: 20, message: "用户名长度为 2-20 个字符", trigger: "blur" },
+  ],
+  userProfile: [
+    { max: 200, message: "简介不能超过 200 个字符", trigger: "blur" },
+  ],
+  userRole: [
+    { required: true, message: "请选择用户角色", trigger: "change" },
+  ],
+};
 
 // 获取数据
 const fetchData = async () => {
@@ -232,6 +303,58 @@ const copyId = (id: number) => {
     .catch(() => {
       message.error("复制失败，请手动复制");
     });
+};
+
+// 编辑用户
+const doEdit = async (record: API.UserVO) => {
+  try {
+    // 获取用户详细信息
+    const res = await getUserVoByIdUsingGet({ userId: record.id });
+    if (res.data.code === 0 && res.data.data) {
+      // 填充表单
+      Object.assign(editForm, {
+        id: res.data.data.id,
+        userName: res.data.data.userName || "",
+        userProfile: res.data.data.userProfile || "",
+        userRole: res.data.data.userRole || "",
+        userAvatar: res.data.data.userAvatar || "",
+      });
+      editModalVisible.value = true;
+    } else {
+      message.error("获取用户信息失败：" + res.data.message);
+    }
+  } catch {
+    message.error("获取用户信息失败");
+  }
+};
+
+// 确认编辑
+const handleEditOk = async () => {
+  try {
+    await editFormRef.value.validate();
+    editLoading.value = true;
+
+    const res = await updateUserUsingPost(editForm);
+    if (res.data.code === 0) {
+      message.success("更新用户信息成功");
+      editModalVisible.value = false;
+      // 刷新数据
+      fetchData();
+    } else {
+      message.error("更新失败：" + res.data.message);
+    }
+  } catch (error) {
+    console.error("表单验证失败:", error);
+  } finally {
+    editLoading.value = false;
+  }
+};
+
+// 取消编辑
+const handleEditCancel = () => {
+  editModalVisible.value = false;
+  // 重置表单
+  editFormRef.value?.resetFields();
 };
 
 // 页面加载时请求一次

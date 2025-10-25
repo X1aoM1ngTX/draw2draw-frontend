@@ -3,10 +3,12 @@
     <!-- 图片展示区 -->
     <a-col :sm="24" :md="16" :xl="18">
       <a-card title="图片预览">
-        <a-image
-          style="max-height: 600px; object-fit: contain"
-          :src="picture.url"
-        />
+        <div style="text-align: center;">
+          <a-image
+            style="max-height: 600px; object-fit: contain"
+            :src="picture.url"
+          />
+        </div>
       </a-card>
     </a-col>
     <!-- 图片信息区 -->
@@ -169,11 +171,17 @@ const canEdit = computed(() => {
 
   // 检查图片权限列表
   const permissionList = picture.value.permissionList || [];
-  const hasEditPermission = permissionList.includes(SPACE_PERMISSION_ENUM.PICTURE_EDIT);
+  const hasEditPermission = permissionList.includes(
+    SPACE_PERMISSION_ENUM.PICTURE_EDIT
+  );
 
   // 仅本人或管理员或有编辑权限的用户可编辑
   const user = picture.value.user || {};
-  return loginUser.id === user.id || loginUser.userRole === "admin" || hasEditPermission;
+  return (
+    loginUser.id === user.id ||
+    loginUser.userRole === "admin" ||
+    hasEditPermission
+  );
 });
 
 // 是否具有删除权限
@@ -186,11 +194,17 @@ const canDelete = computed(() => {
 
   // 检查图片权限列表
   const permissionList = picture.value.permissionList || [];
-  const hasDeletePermission = permissionList.includes(SPACE_PERMISSION_ENUM.PICTURE_DELETE);
+  const hasDeletePermission = permissionList.includes(
+    SPACE_PERMISSION_ENUM.PICTURE_DELETE
+  );
 
   // 仅本人或管理员或有删除权限的用户可删除
   const user = picture.value.user || {};
-  return loginUser.id === user.id || loginUser.userRole === "admin" || hasDeletePermission;
+  return (
+    loginUser.id === user.id ||
+    loginUser.userRole === "admin" ||
+    hasDeletePermission
+  );
 });
 
 // 编辑

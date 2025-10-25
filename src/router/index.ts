@@ -30,6 +30,11 @@ const router = createRouter({
       component: () => import("@/pages/user/UserProfilePage.vue"),
     },
     {
+      path: '/user/vip/exchange',
+      name: '用户兑换会员',
+      component: () => import("@/pages/user/UserExchangeVipPage.vue"),
+    },
+    {
       path: "/noAuth",
       name: "无权限",
       component: () => import("@/pages/error/NoAuth.vue"),

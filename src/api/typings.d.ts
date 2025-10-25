@@ -284,6 +284,10 @@ declare namespace API {
     userName?: string;
     userProfile?: string;
     userRole?: string;
+    vipCode?: string;
+    vipExpireTime?: string;
+    vipNumber?: number;
+    isVip?: number;
   };
 
   type Output = {
@@ -354,7 +358,9 @@ declare namespace API {
     rightOffset?: number;
     topOffset?: number;
     xScale?: number;
+    xscale?: number;
     yScale?: number;
+    yscale?: number;
   };
 
   type Picture = {
@@ -695,6 +701,9 @@ declare namespace API {
     userPassword?: string;
     userProfile?: string;
     userRole?: string;
+    vipCode?: string;
+    vipExpireTime?: string;
+    vipNumber?: number;
   };
 
   type UserAddRequest = {
@@ -740,6 +749,11 @@ declare namespace API {
     userRole?: string;
   };
 
+  type UserMyInfoUpdateRequest = {
+    userName?: string;
+    userProfile?: string;
+  };
+
   type UserVO = {
     createTime?: string;
     id?: number;
@@ -748,5 +762,13 @@ declare namespace API {
     userName?: string;
     userProfile?: string;
     userRole?: string;
+    vipCode?: string;
+    vipExpireTime?: string;
+    vipNumber?: number;
+    isVip?: number;
+  };
+
+  type VipExchangeRequest = {
+    vipCode?: string;
   };
 }
