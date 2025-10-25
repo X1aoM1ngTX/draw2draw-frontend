@@ -1,8 +1,5 @@
-// 从环境变量或配置中获取后端基础URL
-const getBackendBaseUrl = () => {
-  // 开发环境下默认使用localhost:8090
-  return 'localhost:8090';
-};
+const DEV_BASE_URL = "ws://localhost:8090";
+const PROD_BASE_URL = "ws://8.163.29.194";
 
 export default class PictureEditWebSocket {
   private pictureId: number;
@@ -19,8 +16,7 @@ export default class PictureEditWebSocket {
    * 初始化 WebSocket 连接
    */
   connect() {
-    const backendBaseUrl = getBackendBaseUrl();
-    const url = `ws://${backendBaseUrl}/api/ws/picture/edit?pictureId=${this.pictureId}`;
+    const url = `${PROD_BASE_URL}/api/ws/picture/edit?pictureId=${this.pictureId}`;
     this.socket = new WebSocket(url);
 
     // 设置携带 cookie
@@ -52,7 +48,7 @@ export default class PictureEditWebSocket {
         code: event.code,
         reason: event.reason,
         wasClean: event.wasClean,
-        url: url
+        url: url,
       });
       this.triggerEvent("close", event);
     };
@@ -62,7 +58,7 @@ export default class PictureEditWebSocket {
       console.error("WebSocket 连接发生错误:", {
         error: error,
         url: url,
-        readyState: this.socket?.readyState
+        readyState: this.socket?.readyState,
       });
       this.triggerEvent("error", error);
     };
@@ -94,7 +90,9 @@ export default class PictureEditWebSocket {
       console.error("WebSocket未连接，无法发送消息:", {
         message: message,
         readyState: this.socket?.readyState,
-        state: this.socket ? this.getReadyStateText(this.socket.readyState) : 'null'
+        state: this.socket
+          ? this.getReadyStateText(this.socket.readyState)
+          : "null",
       });
     }
   }
@@ -107,15 +105,15 @@ export default class PictureEditWebSocket {
   private getReadyStateText(readyState: number): string {
     switch (readyState) {
       case WebSocket.CONNECTING:
-        return '正在连接';
+        return "正在连接";
       case WebSocket.OPEN:
-        return '已连接';
+        return "已连接";
       case WebSocket.CLOSING:
-        return '正在关闭';
+        return "正在关闭";
       case WebSocket.CLOSED:
-        return '已关闭';
+        return "已关闭";
       default:
-        return '未知状态';
+        return "未知状态";
     }
   }
 

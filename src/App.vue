@@ -1,6 +1,8 @@
 <template>
   <div class="app" @contextmenu.prevent="handleContextMenu">
-    <BasicLayout />
+    <a-config-provider :locale="zhCN">
+      <BasicLayout />
+    </a-config-provider>
 
     <!-- 通用右键菜单 -->
     <div
@@ -41,6 +43,11 @@
 </template>
 
 <script setup lang="ts">
+import zhCN from "ant-design-vue/es/locale/zh_CN";
+import dayjs from "dayjs";
+import "dayjs/locale/zh-cn";
+dayjs.locale("zh-cn");
+
 import { onMounted, onUnmounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import BasicLayout from "./layouts/BasicLayout.vue";
