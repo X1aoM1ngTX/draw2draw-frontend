@@ -20,6 +20,7 @@
         :src="picture?.url"
         alt="avatar"
         class="uploaded-image"
+        style="margin-bottom: 16px;"
       />
     </div>
   </div>
@@ -59,7 +60,7 @@ const handleUpload = async () => {
     } else {
       message.error("图片上传失败，" + res.data.description);
     }
-  } catch (error) {
+  } catch {
     message.error("图片上传失败");
   } finally {
     loading.value = false;
@@ -84,6 +85,8 @@ const handleUpload = async () => {
   max-width: 100%;
   max-height: 400px;
   object-fit: contain;
+  display: block;
+  margin: 0 auto;
 }
 
 .avatar-uploader > .ant-upload {

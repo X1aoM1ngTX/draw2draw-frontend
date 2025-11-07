@@ -1,66 +1,59 @@
 <template>
   <div class="picture-list">
-    <!-- 瀑布流图片列表 - 使用 CSS Columns 布局 -->
-    <div class="columns-container">
-      <div
-        v-for="picture in dataList"
-        :key="picture.id"
-        class="column-item"
-        @click="doClickPicture(picture)"
-      >
+    <!-- 瀑布流图片列表 - 使用 vue-waterfall-plugin-next -->
+    <Waterfall
+      v-if="dataList.length > 0"
+      ref="waterfall"
+      :list="dataList"
+      :width="280"
+      :breakpoints="breakpoints"
+      :gutter="16"
+      :row-key="'id'"
+      :img-selector="'url'"
+    >
+      <template #default="{ item, url, index }">
         <a-card
           hoverable
-          :data-picture-id="picture.id"
+          :data-picture-id="item.id"
+          @click="doClickPicture(item)"
         >
           <template #cover>
-            <img
-              :alt="picture.name"
-              :src="picture.thumbnailUrl ?? picture.url"
-              loading="lazy"
-            />
+            <LazyImg :url="item.thumbnailUrl ?? item.url" />
           </template>
-          <a-card-meta :title="picture.name">
+          <a-card-meta :title="item.name">
             <template #description>
               <a-flex wrap="wrap">
                 <a-tag color="green">
-                  {{ picture.category ?? "默认" }}
+                  {{ item.category ?? "默认" }}
                 </a-tag>
-                <a-tag v-for="tag in picture.tags" :key="tag">
+                <a-tag v-for="tag in item.tags" :key="tag">
                   {{ tag }}
                 </a-tag>
               </a-flex>
             </template>
-            <template #avatar v-if="showAuthor && picture.user">
-              <a-avatar :src="picture.user.userAvatar">
+            <template #avatar v-if="showAuthor && item.user">
+              <a-avatar :src="item.user.userAvatar">
                 {{
-                  (
-                    picture.user.userName ||
-                    picture.user.userAccount ||
-                    "U"
-                  )?.charAt(0)
+                  (item.user.userName || item.user.userAccount || "U")?.charAt(
+                    0
+                  )
                 }}
               </a-avatar>
             </template>
           </a-card-meta>
           <template #actions v-if="showOperation">
-            <a-space
-              v-if="canEdit"
-              @click="(e: Event) => doEdit(picture, e)"
-            >
+            <a-space v-if="canEdit" @click="(e: Event) => doEdit(item, e)">
               <EditOutlined />
               编辑
             </a-space>
-            <a-space
-              v-if="canDelete"
-              @click="(e: Event) => doDelete(picture, e)"
-            >
+            <a-space v-if="canDelete" @click="(e: Event) => doDelete(item, e)">
               <DeleteOutlined />
               删除
             </a-space>
           </template>
         </a-card>
-      </div>
-    </div>
+      </template>
+    </Waterfall>
 
     <!-- 加载中提示 -->
     <div v-if="loading && dataList.length > 0" class="loading-tip">
@@ -81,7 +74,9 @@ import { useRouter } from "vue-router";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons-vue";
 import { deletePictureUsingPost } from "@/api/pictureController";
 import { message } from "ant-design-vue";
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
+import { LazyImg, Waterfall } from "vue-waterfall-plugin-next";
+import "vue-waterfall-plugin-next/dist/style.css";
 
 interface Props {
   dataList?: API.PictureVO[];
@@ -111,7 +106,28 @@ const emit = defineEmits<{
 }>();
 
 // 暴露方法给父组件
-defineExpose({});
+const waterfall = ref();
+defineExpose({ waterfall });
+
+// 瀑布流响应式断点配置
+const breakpoints = ref({
+  1600: {
+    // 屏幕≤1600px
+    rowPerView: 5, // 5列
+  },
+  1200: {
+    rowPerView: 4, // 4列
+  },
+  900: {
+    rowPerView: 3, // 3列
+  },
+  700: {
+    rowPerView: 2, // 2列
+  },
+  500: {
+    rowPerView: 1, // 1列
+  },
+});
 
 // 跳转至图片详情
 const router = useRouter();
@@ -119,9 +135,7 @@ let scrollTimer: number | null = null; // 防抖定时器
 
 // 点击图片
 const doClickPicture = (picture: API.PictureVO) => {
-  router.push({
-    path: `/picture/${picture.id}`,
-  });
+  window.open(`/picture/${picture.id}`, '_blank');
 };
 
 // 编辑
@@ -179,12 +193,12 @@ const handleScroll = () => {
 
 // 组件挂载时设置监听
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener("scroll", handleScroll, { passive: true });
 });
 
 // 组件卸载时清理
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll);
+  window.removeEventListener("scroll", handleScroll);
   if (scrollTimer) {
     clearTimeout(scrollTimer);
   }
@@ -192,42 +206,9 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* CSS Columns 瀑布流布局 */
-
-/* 瀑布流容器 */
-.columns-container {
+/* 瀑布流布局样式 */
+.picture-list {
   width: 100%;
-  padding: 16px;
-  background-color: #f5f5f5;
-
-  /* 5列布局 */
-  column-count: 5;
-  column-gap: 16px;
-  column-width: 200px; /* 每列最小宽度 */
-}
-
-/* 瀑布流项目 */
-.column-item {
-  break-inside: avoid; /* 防止卡片内部元素被分页 */
-  page-break-inside: avoid;
-  margin-bottom: 16px;
-}
-
-/* 卡片覆盖图片 */
-.column-item :deep(.ant-card-cover) {
-  margin: 0;
-}
-
-.column-item :deep(.ant-card-cover) img {
-  width: 100%;
-  height: auto;
-  object-fit: cover; /* 可调整：cover(裁剪填满), contain(完整显示) */
-  display: block;
-}
-
-/* 标签换行 */
-.column-item :deep(.ant-flex) {
-  margin-top: 8px;
 }
 
 /* 加载中提示 */
@@ -237,11 +218,11 @@ onUnmounted(() => {
   color: #999;
 }
 
-/* 骨架屏容器 - 使用相同的 Columns 布局 */
+/* 骨架屏容器 - 使用网格布局 */
 .skeleton-container {
-  column-count: 5;
-  column-gap: 16px;
-  column-width: 200px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
   width: 100%;
   padding: 16px;
   background-color: #f5f5f5;
@@ -250,43 +231,42 @@ onUnmounted(() => {
 .skeleton-item {
   break-inside: avoid;
   page-break-inside: avoid;
-  margin-bottom: 16px;
 }
 
-/* 🔧 响应式调整 - 调整列数 */
-@media (max-width: 576px) {
-  .columns-container,
+/* 🔧 响应式调整 - 调整骨架屏列数 */
+@media (max-width: 500px) {
   .skeleton-container {
-    column-count: 2; /* 移动端2列 */
-    column-gap: 8px;
-    padding: 8px;
-  }
-  .skeleton-item {
-    margin-bottom: 8px;
+    grid-template-columns: repeat(1, 1fr);
   }
 }
 
-@media (min-width: 576px) and (max-width: 768px) {
-  .columns-container,
+@media (min-width: 500px) and (max-width: 700px) {
   .skeleton-container {
-    column-count: 3; /* 平板3列 */
-    column-gap: 12px;
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (min-width: 768px) and (max-width: 1200px) {
-  .columns-container,
+@media (min-width: 700px) and (max-width: 900px) {
   .skeleton-container {
-    column-count: 4; /* 小桌面4列 */
-    column-gap: 16px;
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@media (min-width: 1200px) {
-  .columns-container,
+@media (min-width: 900px) and (max-width: 1200px) {
   .skeleton-container {
-    column-count: 5; /* 大桌面5列 */
-    column-gap: 16px;
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1600px) {
+  .skeleton-container {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+@media (min-width: 1600px) {
+  .skeleton-container {
+    grid-template-columns: repeat(5, 1fr);
   }
 }
 </style>
