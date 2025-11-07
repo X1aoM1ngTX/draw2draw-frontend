@@ -14,6 +14,16 @@
             Ant Design Vue
           </a>
         </span>
+        <span class="divider">|</span>
+        <span class="icp-number">
+          <a
+            href="https://beian.miit.gov.cn/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            粤ICP备2025471762号-1
+          </a>
+        </span>
       </div>
       <div class="footer-links">
         <a-tooltip title="访问 GitHub">
@@ -72,6 +82,20 @@ import { GithubOutlined } from "@ant-design/icons-vue";
 
 .footer-text a:hover {
   color: #40a9ff;
+  text-decoration: underline;
+}
+
+.icp-number {
+  font-size: 12px;
+}
+
+.icp-number a {
+  color: #666;
+  text-decoration: none;
+}
+
+.icp-number a:hover {
+  color: #1890ff;
   text-decoration: underline;
 }
 

@@ -32,14 +32,12 @@
         </a-checkable-tag>
       </a-space>
     </div>
-    <!-- 图片列表 -->
-    <PictureList :dataList="dataList" :loading="loading" />
-    <a-pagination
-      style="text-align: right"
-      v-model:current="searchParams.current"
-      v-model:pageSize="searchParams.pageSize"
-      :total="total"
-      @change="onPageChange"
+    <!-- 瀑布流图片列表 -->
+    <PictureList
+      :dataList="dataList"
+      :loading="loading"
+      @scroll-bottom="handleScrollBottom"
+      @reload="fetchData"
     />
   </div>
   <a-back-top />
@@ -66,15 +64,16 @@ const searchParams = reactive<API.PictureQueryRequest>({
   sortOrder: "descend",
 });
 
-// 分页参数
-const onPageChange = (page: number, pageSize: number) => {
-  searchParams.current = page;
-  searchParams.pageSize = pageSize;
-  fetchData();
+// 无限滚动处理
+const handleScrollBottom = () => {
+  if (!loading.value && dataList.value.length < total.value) {
+    searchParams.current = (searchParams.current ?? 1) + 1;
+    fetchData(true);
+  }
 };
 
 // 获取数据
-const fetchData = async () => {
+const fetchData = async (isAppend = false) => {
   loading.value = true;
   // 转换搜索参数
   const params = {
@@ -91,7 +90,13 @@ const fetchData = async () => {
   });
   const res = await listPictureVoByPageUsingPost(params);
   if (res.data.data) {
-    dataList.value = res.data.data.records ?? [];
+    if (isAppend) {
+      // 追加数据（无限滚动）
+      dataList.value.push(...(res.data.data.records ?? []));
+    } else {
+      // 重置数据（搜索、筛选）
+      dataList.value = res.data.data.records ?? [];
+    }
     total.value = res.data.data.total ?? 0;
   } else {
     message.error("获取数据失败，" + res.data.message);
@@ -103,7 +108,8 @@ const fetchData = async () => {
 const doSearch = () => {
   // 重置页码
   searchParams.current = 1;
-  fetchData();
+  dataList.value = []; // 清空现有数据
+  fetchData(false);
 };
 
 // 图片分类和标签
@@ -128,7 +134,7 @@ const getTagCategoryOptions = async () => {
 
 // 页面加载时请求一次
 onMounted(() => {
-  fetchData();
+  fetchData(false);
   getTagCategoryOptions();
 });
 </script>

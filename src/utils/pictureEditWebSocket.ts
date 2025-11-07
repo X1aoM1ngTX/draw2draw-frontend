@@ -1,5 +1,7 @@
-const DEV_BASE_URL = "ws://localhost:8090";
-const PROD_BASE_URL = "ws://8.163.29.194";
+const DEV_WS_URL = "ws://localhost:8090/api/ws";
+const PROD_WS_URL = window.location.protocol === 'https:'
+  ? 'wss://picture.game9hq.xyz/api/ws'
+  : 'ws://picture.game9hq.xyz/api/ws';
 
 export default class PictureEditWebSocket {
   private pictureId: number;
@@ -16,7 +18,7 @@ export default class PictureEditWebSocket {
    * 初始化 WebSocket 连接
    */
   connect() {
-    const url = `${PROD_BASE_URL}/api/ws/picture/edit?pictureId=${this.pictureId}`;
+    const url = `${PROD_WS_URL}/api/ws/picture/edit?pictureId=${this.pictureId}`;
     this.socket = new WebSocket(url);
 
     // 设置携带 cookie

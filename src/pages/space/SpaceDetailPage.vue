@@ -49,6 +49,7 @@
     <PictureSearchForm :onSearch="onSearch" />
     <!-- 图片列表 -->
     <PictureList
+      ref="pictureListRef"
       :showOperation="true"
       :dataList="dataList"
       :loading="loading"
@@ -57,6 +58,8 @@
       :showAuthor="false"
       :canEdit="canEditPicture"
       :canDelete="canDeletePicture"
+      @scroll-bottom="handleScrollBottom"
+      @reload="fetchData"
     />
     <!-- 分页 -->
     <a-pagination
@@ -248,6 +251,7 @@ const fetchSpaceDetail = async () => {
 const dataList = ref<API.PictureVO[]>([]);
 const total = ref(0);
 const loading = ref(true);
+const pictureListRef = ref();
 
 // 搜索条件
 const searchParams = ref<API.PictureQueryRequest & { picColor?: string }>({
@@ -358,6 +362,22 @@ const onPageChange = (page: number, pageSize: number) => {
   fetchData();
 };
 
+// 无限滚动处理
+const handleScrollBottom = () => {
+  // 检查是否还有更多数据可以加载
+  if (!loading.value && dataList.value.length < total.value) {
+    const nextPage = (searchParams.value.current ?? 1) + 1;
+    searchParams.value.current = nextPage;
+
+    // 标记正在追加数据
+    if (pictureListRef.value) {
+      pictureListRef.value.markAsAppending();
+    }
+
+    fetchData();
+  }
+};
+
 // 弹窗相关方法
 /**
  * 图片上传成功
@@ -397,20 +417,8 @@ const handleSubmit = async (value: any) => {
 const getTagCategoryOptions = async () => {
   const res = await listPictureTagCategoryUsingGet();
   if (res.data.data && res.data.code === 0) {
-    tagOptions.value = (res.data.data.tagList ?? []).map((data: string) => {
-      return {
-        value: data,
-        label: data,
-      };
-    });
-    categoryOptions.value = (res.data.data.categoryList ?? []).map(
-      (data: string) => {
-        return {
-          value: data,
-          label: data,
-        };
-      }
-    );
+    tagOptions.value = (res.data.data.tagList ?? []) as string[];
+    categoryOptions.value = (res.data.data.categoryList ?? []) as string[];
   } else {
     message.error("获取标签分类失败：" + res.data.message);
   }
@@ -422,8 +430,8 @@ const getTagCategoryOptions = async () => {
 const handleModalCancel = () => {
   showUploadModal.value = false;
   picture.value = undefined;
-  Object.keys(pictureForm).forEach((key) => {
-    delete pictureForm[key];
+  Object.keys(pictureForm).forEach((key: string) => {
+    delete pictureForm[key as keyof typeof pictureForm];
   });
 };
 

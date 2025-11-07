@@ -3,7 +3,7 @@ import axios from "axios";
 
 // 区分开发和生产环境
 const DEV_BASE_URL = "http://localhost:8090";
-const PROD_BASE_URL = "http://8.163.29.194";
+const PROD_BASE_URL = "/api";
 
 // 创建 Axios 实例
 const myAxios = axios.create({
