@@ -90,6 +90,13 @@ declare namespace API {
     message?: string;
   };
 
+  type BaseResponseListTencentImageLabelResult_ = {
+    code?: number;
+    data?: TencentImageLabelResult[];
+    description?: string;
+    message?: string;
+  };
+
   type BaseResponseLoginUserVO_ = {
     code?: number;
     data?: LoginUserVO;
@@ -278,6 +285,7 @@ declare namespace API {
     createTime?: string;
     editTime?: string;
     id?: number;
+    isVip?: number;
     updateTime?: string;
     userAccount?: string;
     userAvatar?: string;
@@ -287,7 +295,6 @@ declare namespace API {
     vipCode?: string;
     vipExpireTime?: string;
     vipNumber?: number;
-    isVip?: number;
   };
 
   type Output = {
@@ -677,6 +684,13 @@ declare namespace API {
     total?: number;
   };
 
+  type TencentImageLabelResult = {
+    confidence?: number;
+    firstCategory?: string;
+    label?: string;
+    secondCategory?: string;
+  };
+
   type testDownloadFileUsingGETParams = {
     /** filepath */
     filepath?: string;
@@ -694,6 +708,7 @@ declare namespace API {
     editTime?: string;
     id?: number;
     isDelete?: number;
+    isVip?: number;
     updateTime?: string;
     userAccount?: string;
     userAvatar?: string;
@@ -723,6 +738,11 @@ declare namespace API {
     userPassword?: string;
   };
 
+  type UserMyInfoUpdateRequest = {
+    userName?: string;
+    userProfile?: string;
+  };
+
   type UserQueryRequest = {
     current?: number;
     id?: number;
@@ -749,14 +769,10 @@ declare namespace API {
     userRole?: string;
   };
 
-  type UserMyInfoUpdateRequest = {
-    userName?: string;
-    userProfile?: string;
-  };
-
   type UserVO = {
     createTime?: string;
     id?: number;
+    isVip?: number;
     userAccount?: string;
     userAvatar?: string;
     userName?: string;
@@ -765,7 +781,6 @@ declare namespace API {
     vipCode?: string;
     vipExpireTime?: string;
     vipNumber?: number;
-    isVip?: number;
   };
 
   type VipExchangeRequest = {

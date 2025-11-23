@@ -30,8 +30,11 @@
     <div v-if="picture" class="edit-bar">
       <a-space>
         <a-button @click="doEditPicture"><EditOutlined />编辑图片</a-button>
-        <a-button @click="doImagePainting"
-          ><FullscreenOutlined />AI扩图</a-button
+        <a-button @click="doImagePainting">
+          <FullscreenOutlined />AI扩图
+        </a-button>
+        <a-button @click="doImageLabelRecognition"
+          ><ScanOutlined />识别标签</a-button
         >
       </a-space>
       <ImageCropper
@@ -49,6 +52,35 @@
         :onSuccess="onImageOutPaintingSuccess"
       />
     </div>
+
+    <!-- 标签识别结果模态框 -->
+    <a-modal
+      v-model:open="labelModalVisible"
+      title="图片标签识别结果"
+      @ok="handleLabelModalOk"
+      @cancel="handleLabelModalCancel"
+      :confirm-loading="labelModalLoading"
+    >
+      <div v-if="labelResults.length > 0">
+        <p>识别到以下标签，请选择需要添加的标签：</p>
+        <a-checkbox-group v-model:value="selectedLabels">
+          <a-row>
+            <a-col :span="12" v-for="label in labelResults" :key="label.label">
+              <a-checkbox :value="label.label">
+                {{ label.label }} (置信度: {{ label.confidence || 0 }}%)
+              </a-checkbox>
+            </a-col>
+          </a-row>
+        </a-checkbox-group>
+      </div>
+      <div v-else-if="!labelModalLoading">
+        <a-empty description="未识别到标签" />
+      </div>
+      <div v-else>
+        <a-spin size="large" />
+        <p style="text-align: center; margin-top: 16px">正在识别图片标签...</p>
+      </div>
+    </a-modal>
     <!-- 创建图片表单 -->
     <a-form
       v-if="picture"
@@ -101,8 +133,13 @@ import {
   editPictureUsingPost,
   getPictureVoByIdUsingGet,
   listPictureTagCategoryUsingGet,
+  triggerImageLabelUsingPost,
 } from "@/api/pictureController";
-import { EditOutlined, FullscreenOutlined } from "@ant-design/icons-vue";
+import {
+  EditOutlined,
+  FullscreenOutlined,
+  ScanOutlined,
+} from "@ant-design/icons-vue";
 import ImageCropper from "@/components/ImageCropper.vue";
 import ImageOutPainting from "@/components/ImageOutPainting.vue";
 import PictureUpload from "@/components/PictureUpload.vue";
@@ -118,8 +155,15 @@ const pictureForm = reactive<API.PictureEditRequest>({});
 const route = useRoute();
 const uploadType = ref<"file" | "url">("file");
 const spaceId = computed(() => {
-  return route.query?.spaceId;
+  const id = route.query?.spaceId;
+  return id ? Number(id) : undefined;
 });
+
+// 标签识别相关状态
+const labelModalVisible = ref(false);
+const labelModalLoading = ref(false);
+const labelResults = ref<API.TencentImageLabelResult[]>([]);
+const selectedLabels = ref<string[]>([]);
 
 /**
  * 提交表单
@@ -225,7 +269,67 @@ const onImageOutPaintingSuccess = (newPicture: API.PictureVO) => {
   picture.value = newPicture;
 };
 
-const space = ref<API.SpaceVO>()
+// ------ 图片标签识别 ------
+/**
+ * 图片标签识别
+ */
+const doImageLabelRecognition = async () => {
+  if (!picture.value?.id) {
+    message.error("请先上传图片");
+    return;
+  }
+
+  labelModalVisible.value = true;
+  labelModalLoading.value = true;
+  labelResults.value = [];
+  selectedLabels.value = [];
+
+  try {
+    const res = await triggerImageLabelUsingPost({
+      pictureId: picture.value.id,
+    });
+
+    if (res.data.code === 0 && res.data.data) {
+      labelResults.value = res.data.data;
+      // 默认选中置信度大于0.5的标签
+      selectedLabels.value = res.data.data
+        .filter(
+          (label: API.TencentImageLabelResult) => (label.confidence || 0) > 50
+        )
+        .map((label: API.TencentImageLabelResult) => label.label || "");
+    } else {
+      message.error("标签识别失败：" + res.data.message);
+    }
+  } catch {
+    message.error("标签识别请求失败");
+  } finally {
+    labelModalLoading.value = false;
+  }
+};
+
+/**
+ * 标签模态框确认
+ */
+const handleLabelModalOk = () => {
+  // 将选中的标签添加到表单中
+  if (selectedLabels.value.length > 0) {
+    // 合并现有标签和新选中的标签，去重
+    const existingTags = pictureForm.tags || [];
+    const newTags = [...new Set([...existingTags, ...selectedLabels.value])];
+    pictureForm.tags = newTags;
+    message.success(`已添加 ${selectedLabels.value.length} 个标签`);
+  }
+  labelModalVisible.value = false;
+};
+
+/**
+ * 标签模态框取消
+ */
+const handleLabelModalCancel = () => {
+  labelModalVisible.value = false;
+};
+
+const space = ref<API.SpaceVO>();
 
 // 获取空间信息
 const fetchSpace = async () => {
@@ -233,17 +337,16 @@ const fetchSpace = async () => {
   if (spaceId.value) {
     const res = await getSpaceVoByIdUsingGet({
       id: spaceId.value,
-    })
+    });
     if (res.data.code === 0 && res.data.data) {
-      space.value = res.data.data
+      space.value = res.data.data;
     }
   }
-}
+};
 
 watchEffect(() => {
-  fetchSpace()
-})
-
+  fetchSpace();
+});
 
 onMounted(() => {
   getTagCategoryOptions();

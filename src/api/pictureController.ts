@@ -221,6 +221,24 @@ export async function listPictureTagCategoryUsingGet(options?: {
   );
 }
 
+/** triggerImageLabel POST /api/picture/trigger/image_label */
+export async function triggerImageLabelUsingPost(
+  body: Record<string, any>,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseListTencentImageLabelResult_>(
+    "/api/picture/trigger/image_label",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
 /** updatePicture POST /api/picture/update */
 export async function updatePictureUsingPost(
   body: API.PictureUpdateRequest,
