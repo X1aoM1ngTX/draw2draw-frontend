@@ -156,7 +156,7 @@ const route = useRoute();
 const uploadType = ref<"file" | "url">("file");
 const spaceId = computed(() => {
   const id = route.query?.spaceId;
-  return id ? Number(id) : undefined;
+  return id;
 });
 
 // 标签识别相关状态
