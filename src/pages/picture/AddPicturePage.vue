@@ -25,6 +25,13 @@
           :onSuccess="onSuccess"
         />
       </a-tab-pane>
+      <a-tab-pane key="ai" tab="AI 生成" force-render>
+        <AiImageGenerate
+          :picture="picture"
+          :spaceId="spaceId"
+          :onSuccess="onSuccess"
+        />
+      </a-tab-pane>
     </a-tabs>
     <!-- 图片编辑 -->
     <div v-if="picture" class="edit-bar">
@@ -144,6 +151,7 @@ import ImageCropper from "@/components/ImageCropper.vue";
 import ImageOutPainting from "@/components/ImageOutPainting.vue";
 import PictureUpload from "@/components/PictureUpload.vue";
 import UrlPictureUpload from "@/components/UrlPictureUpload.vue";
+import AiImageGenerate from "@/components/AiImageGenerate.vue";
 import router from "@/router";
 import { message } from "ant-design-vue";
 import { computed, onMounted, reactive, ref, watchEffect } from "vue";
@@ -153,7 +161,7 @@ import { getSpaceVoByIdUsingGet } from "@/api/spaceController";
 const picture = ref<API.PictureVO>();
 const pictureForm = reactive<API.PictureEditRequest>({});
 const route = useRoute();
-const uploadType = ref<"file" | "url">("file");
+const uploadType = ref<"file" | "url" | "ai">("file");
 const spaceId = computed(() => {
   const id = route.query?.spaceId;
   return id;

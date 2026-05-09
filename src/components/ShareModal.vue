@@ -30,12 +30,12 @@ interface Props {
 
 /**
  * 给组件指定初始值
+ * link 默认为当前域名首页，父组件传入 pictureId 时会自动拼接 /picture/{id}
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const props = withDefaults(defineProps<Props>(), {
   title: () => "分享",
-  // link: () => "https://picture.game9hq.xyz/share/X1aoM1ngTX",
-  link: () => "http://localhost:5173/", // TODO: 这里需要动态生成链接
+  link: () => `${window.location.origin}/`,
 });
 
 const visible = ref<boolean>(false);

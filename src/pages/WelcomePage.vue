@@ -31,7 +31,7 @@
         </a-col>
         <a-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">
           <div class="welcome-image">
-            <img src="../assets/d2d.png" alt="Draw2Draw" />
+            <img src="../assets/d2d-v2-1.jpg" alt="Draw2Draw" />
           </div>
         </a-col>
       </a-row>
@@ -196,11 +196,11 @@ const goToDrawing = () => {
 };
 
 const scrollToCoreFeatures = () => {
-  const element = document.getElementById('core-features');
+  const element = document.getElementById("core-features");
   if (element) {
     element.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
+      behavior: "smooth",
+      block: "start",
     });
   }
 };

@@ -786,4 +786,66 @@ declare namespace API {
   type VipExchangeRequest = {
     vipCode?: string;
   };
+
+  type AiImageGenerateRequest = {
+    userPrompt?: string;
+    negativePrompt?: string;
+    size?: string;
+    promptExtend?: boolean;
+    seed?: number;
+    spaceId?: number;
+    pictureName?: string;
+    category?: string;
+    tags?: string[];
+    introduction?: string;
+  };
+
+  type AiGenerateTaskVO = {
+    id?: number;
+    userId?: number;
+    userName?: string;
+    spaceId?: number;
+    spaceName?: string;
+    modelName?: string;
+    prompt?: string;
+    negativePrompt?: string;
+    status?: string;
+    statusText?: string;
+    errorMessage?: string;
+    resultCount?: number;
+    pictures?: PictureVO[];
+    createTime?: string;
+    updateTime?: string;
+  };
+
+  type AiTaskQueryRequest = {
+    current?: number;
+    pageSize?: number;
+    userId?: number;
+    spaceId?: number;
+    status?: number;
+    modelName?: string;
+  };
+
+  type PageAiGenerateTaskVO_ = {
+    current?: number;
+    pages?: number;
+    records?: AiGenerateTaskVO[];
+    size?: number;
+    total?: number;
+  };
+
+  type BaseResponseAiGenerateTaskVO_ = {
+    code?: number;
+    data?: AiGenerateTaskVO;
+    message?: string;
+    description?: string;
+  };
+
+  type BaseResponsePageAiGenerateTaskVO_ = {
+    code?: number;
+    data?: PageAiGenerateTaskVO_;
+    message?: string;
+    description?: string;
+  };
 }
